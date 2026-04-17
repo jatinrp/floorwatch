@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Incident Investigation System</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f2ed;
+  --surface: #faf9f6;
+  --surface2: #efede8;
+  --border: #d8d4cc;
+  --border-dark: #b8b4ac;
+  --text: #1a1916;
+  --text-muted: #6b6860;
+  --text-faint: #9c9890;
+  --accent: #1a3a2a;
+  --accent-light: #2d5c42;
+  --accent-pale: #e8f0eb;
+  --warn: #8b3a1a;
+  --warn-pale: #f5ebe6;
+  --info: #1a2e4a;
+  --info-pale: #e6ecf5;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'IBM Plex Sans', sans-serif;
+  --radius: 6px;
+  --radius-lg: 10px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ── HEADER ── */
+.header {
+  background: var(--accent);
+  color: #fff;
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.header-brand .logo {
+  width: 28px; height: 28px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+}
+.header-brand .logo svg { width: 16px; height: 16px; }
+.header-brand .brand-name {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.header-brand .brand-sub {
+  font-size: 11px;
+  color: rgba(255,255,255,0.55);
+  font-family: var(--mono);
+}
+.header-nav { display: flex; gap: 4px; }
+.nav-btn {
+  padding: 6px 14px;
+  border-radius: var(--radius);
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.65);
+  font-family: var(--sans);
+  font-size: 13px;
+  cursor: pointer;
+  transition: .15s;
+  font-weight: 400;
+}
+.nav-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.nav-btn.active { background: rgba(255,255,255,0.18); color: #fff; font-weight: 500; }
+
+/* ── VIEWS ── */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ── DASHBOARD ── */
+.dash-header {
+  padding: 2rem 2rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.dash-title { font-size: 22px; font-weight: 600; color: var(--text); }
+.dash-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  padding: 1.5rem 2rem;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem;
+}
+.stat-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .06em; color: var(--text-faint); margin-bottom: .5rem; font-family: var(--mono); }
+.stat-val { font-size: 28px; font-weight: 600; color: var(--text); line-height: 1; }
+.stat-val.accent { color: var(--accent); }
+.stat-val.warn { color: var(--warn); }
+
+.dash-body { padding: 0 2rem 2rem; }
+.section-title {
+  font-size: 11px; font-weight: 500; text-transform: uppercase;
+  letter-spacing: .07em; color: var(--text-faint);
+  font-family: var(--mono);
+  padding: 1.25rem 0 .75rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1rem;
+}
+
+.filter-bar {
+  display: flex; gap: .75rem; align-items: center;
+  margin-bottom: 1rem; flex-wrap: wrap;
+}
+.filter-bar select, .filter-bar input {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: .35rem .75rem;
+  font-family: var(--sans);
+  font-size: 13px;
+  background: var(--surface);
+  color: var(--text);
+  outline: none;
+}
+.filter-bar select:focus, .filter-bar input:focus { border-color: var(--accent); }
+
+.incident-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  font-size: 13px;
+}
+.incident-table th {
+  text-align: left;
+  padding: .625rem 1rem;
+  background: var(--surface2);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.incident-table td {
+  padding: .75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  color: var(--text);
+}
+.incident-table tr:last-child td { border-bottom: none; }
+.incident-table tr:hover td { background: var(--surface2); }
+.incident-table tr { cursor: pointer; transition: .1s; }
+
+.badge {
+  display: inline-block;
+  font-size: 10px; font-weight: 500;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+.badge-careless { background: var(--warn-pale); color: var(--warn); }
+.badge-understand { background: var(--info-pale); color: var(--info); }
+.badge-noprocess { background: #f0ebd8; color: #6b5020; }
+.badge-open { background: var(--warn-pale); color: var(--warn); }
+.badge-closed { background: var(--accent-pale); color: var(--accent); }
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: var(--text-muted);
+}
+.empty-state .es-icon { font-size: 32px; margin-bottom: .75rem; opacity: .4; }
+.empty-state p { font-size: 14px; }
+
+/* ── FORM VIEW ── */
+.form-layout {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+.form-header { margin-bottom: 1.75rem; }
+.form-header h1 { font-size: 20px; font-weight: 600; color: var(--text); }
+.form-header p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+.progress-bar {
+  display: flex;
+  gap: 0;
+  margin-bottom: 2rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface2);
+}
+.prog-step {
+  flex: 1;
+  padding: .5rem .75rem;
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--text-faint);
+  text-align: center;
+  transition: .2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.prog-step.done { background: var(--accent-pale); color: var(--accent); }
+.prog-step.active { background: var(--accent); color: #fff; font-weight: 500; }
+
+.form-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+.form-card-header {
+  padding: .75rem 1.25rem;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--text-muted);
+}
+.form-card-body { padding: 1.25rem; }
+
+.field { margin-bottom: 1.1rem; }
+.field:last-child { margin-bottom: 0; }
+.field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: .35rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  font-family: var(--mono);
+}
+.field label .req { color: var(--warn); margin-left: 2px; }
+.field input, .field select, .field textarea {
+  width: 100%;
+  padding: .5rem .75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--sans);
+  font-size: 14px;
+  color: var(--text);
+  background: var(--surface);
+  transition: border-color .15s;
+  outline: none;
+  resize: vertical;
+}
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); }
+.field textarea { min-height: 72px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+.chip-group { display: flex; flex-wrap: wrap; gap: .5rem; }
+.chip {
+  padding: .375rem .875rem;
+  border: 1px solid var(--border-dark);
+  border-radius: 20px;
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: .15s;
+  background: var(--surface);
+  user-select: none;
+}
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.chip.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.branch-box {
+  background: var(--info-pale);
+  border: 1px solid #c0cfe6;
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  margin-top: .75rem;
+  display: none;
+}
+.branch-box.visible { display: block; }
+.branch-box .branch-label {
+  font-size: 11px; font-weight: 500; text-transform: uppercase;
+  letter-spacing: .05em; color: var(--info); font-family: var(--mono);
+  margin-bottom: .75rem;
+}
+
+.extra-q { margin-bottom: .75rem; }
+.extra-q-row { display: flex; gap: .5rem; align-items: flex-start; }
+.extra-q-row input { flex: 2; }
+.extra-q-row textarea { flex: 3; min-height: 52px; }
+.extra-q-remove {
+  width: 28px; height: 36px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface2);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: .15s;
+}
+.extra-q-remove:hover { background: var(--warn-pale); color: var(--warn); border-color: var(--warn); }
+
+.btn-row {
+  display: flex; gap: .75rem; justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+.btn {
+  padding: .5rem 1.25rem;
+  border-radius: var(--radius);
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: .15s;
+  border: 1px solid var(--border-dark);
+  background: var(--surface);
+  color: var(--text);
+}
+.btn:hover { background: var(--surface2); }
+.btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.btn.primary:hover { background: var(--accent-light); }
+.btn.add {
+  background: transparent;
+  border: 1px dashed var(--border-dark);
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.btn.add:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-pale); }
+
+/* ── STEP display ── */
+.form-step { display: none; }
+.form-step.active { display: block; }
+
+/* ── OUTPUT / FLOWCHART ── */
+.output-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+.output-wrap h3 { font-size: 14px; font-weight: 600; margin-bottom: 1rem; color: var(--text); }
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .5rem 1.5rem;
+  margin-bottom: 1.25rem;
+}
+.summary-item { font-size: 13px; }
+.summary-item .sl { color: var(--text-faint); font-family: var(--mono); font-size: 11px; display: block; margin-bottom: 1px; }
+.summary-item .sv { color: var(--text); font-weight: 500; }
+
+.flow-container {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #fff;
+}
+.flow-container svg { display: block; width: 100%; }
+
+.action-pills { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .75rem; }
+.action-pill {
+  background: var(--accent-pale);
+  border: 1px solid #b8d4c2;
+  border-radius: 20px;
+  padding: .35rem .875rem;
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+/* ── DETAIL MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  max-width: 680px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0;
+  background: var(--surface);
+  z-index: 1;
+}
+.modal-title { font-size: 15px; font-weight: 600; }
+.modal-close {
+  width: 28px; height: 28px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface2);
+  cursor: pointer;
+  font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted);
+  transition: .15s;
+}
+.modal-close:hover { background: var(--warn-pale); color: var(--warn); }
+.modal-body { padding: 1.5rem; }
+
+.modal-section { margin-bottom: 1.5rem; }
+.modal-section-title {
+  font-size: 10px; font-weight: 500; text-transform: uppercase;
+  letter-spacing: .07em; color: var(--text-faint);
+  font-family: var(--mono); margin-bottom: .75rem;
+  padding-bottom: .4rem; border-bottom: 1px solid var(--border);
+}
+.modal-field { margin-bottom: .6rem; font-size: 13px; display: flex; gap: .75rem; }
+.modal-field .mfl { color: var(--text-muted); min-width: 120px; font-family: var(--mono); font-size: 11px; padding-top: 1px; }
+.modal-field .mfv { color: var(--text); font-weight: 500; }
+
+@media (max-width: 640px) {
+  .stats-row { grid-template-columns: 1fr 1fr; }
+  .field-row { grid-template-columns: 1fr; }
+  .summary-grid { grid-template-columns: 1fr; }
+  .form-layout { padding: 1rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-brand">
+    <div class="logo">
+      <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 2L14 5.5V10.5L8 14L2 10.5V5.5L8 2Z" stroke="white" stroke-width="1.2" fill="none"/>
+        <circle cx="8" cy="8" r="2" fill="white"/>
+      </svg>
+    </div>
+    <div>
+      <div class="brand-name">Floor Watch</div>
+      <div class="brand-sub">Incident Investigation System</div>
+    </div>
+  </div>
+  <div class="header-nav">
+    <button class="nav-btn active" onclick="showView('dashboard')" id="nav-dashboard">Dashboard</button>
+    <button class="nav-btn" onclick="showView('form')" id="nav-form">New Investigation</button>
+  </div>
+</div>
+
+<!-- ══════════════ DASHBOARD VIEW ══════════════ -->
+<div class="view active" id="view-dashboard">
+  <div class="dash-header">
+    <div class="dash-title">Incident Dashboard</div>
+    <div class="dash-sub">All submitted investigations — visible to supervisors and stakeholders</div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Total Incidents</div>
+      <div class="stat-val accent" id="stat-total">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">This Month</div>
+      <div class="stat-val" id="stat-month">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Careless Errors</div>
+      <div class="stat-val warn" id="stat-careless">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Training Gaps</div>
+      <div class="stat-val" id="stat-training">0</div>
+    </div>
+  </div>
+
+  <div class="dash-body">
+    <div class="section-title">Investigation Log</div>
+    <div class="filter-bar">
+      <input type="text" id="filter-search" placeholder="Search employee, line, supervisor..." oninput="renderTable()" style="width:240px">
+      <select id="filter-rc" onchange="renderTable()">
+        <option value="">All root causes</option>
+        <option value="careless">Employee careless</option>
+        <option value="understand">Didn't understand</option>
+        <option value="noprocess">No process exists</option>
+      </select>
+      <select id="filter-line" onchange="renderTable()">
+        <option value="">All lines</option>
+      </select>
+    </div>
+    <table class="incident-table" id="incident-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Date</th>
+          <th>Line / Area</th>
+          <th>Supervisor</th>
+          <th>Employee(s)</th>
+          <th>Root Cause</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+    <div class="empty-state" id="empty-state" style="display:none">
+      <div class="es-icon">📋</div>
+      <p>No investigations submitted yet.<br>Use <strong>New Investigation</strong> to log an incident.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ FORM VIEW ══════════════ -->
+<div class="view" id="view-form">
+  <div class="form-layout">
+    <div class="form-header">
+      <h1>New Incident Investigation</h1>
+      <p>Complete all steps. The investigation flowchart is generated automatically.</p>
+    </div>
+
+    <div class="progress-bar">
+      <div class="prog-step active" id="ps1">1 · Incident</div>
+      <div class="prog-step" id="ps2">2 · Root Cause</div>
+      <div class="prog-step" id="ps3">3 · Custom Qs</div>
+      <div class="prog-step" id="ps4">4 · Review</div>
+    </div>
+
+    <!-- STEP 1 -->
+    <div class="form-step active" id="step1">
+      <div class="form-card">
+        <div class="form-card-header">Incident details</div>
+        <div class="form-card-body">
+          <div class="field-row">
+            <div class="field">
+              <label>Date &amp; Time <span class="req">*</span></label>
+              <input type="datetime-local" id="f-datetime">
+            </div>
+            <div class="field">
+              <label>Shift</label>
+              <select id="f-shift">
+                <option value="">Select shift</option>
+                <option>Day (6am–2pm)</option>
+                <option>Afternoon (2pm–10pm)</option>
+                <option>Night (10pm–6am)</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Supervisor Name <span class="req">*</span></label>
+              <input type="text" id="f-supervisor" placeholder="Full name">
+            </div>
+            <div class="field">
+              <label>Line / Work Area <span class="req">*</span></label>
+              <input type="text" id="f-line" placeholder="e.g. Line 3, Assembly B">
+            </div>
+          </div>
+          <div class="field">
+            <label>Employee(s) Involved <span class="req">*</span></label>
+            <input type="text" id="f-employees" placeholder="Names or badge numbers (comma-separated)">
+          </div>
+          <div class="field">
+            <label>Brief description of error / delay <span class="req">*</span></label>
+            <textarea id="f-description" placeholder="What happened? What was the impact on production?"></textarea>
+          </div>
+          <div class="field">
+            <label>How long was production delayed?</label>
+            <input type="text" id="f-delay" placeholder="e.g. 45 minutes, 2 hours">
+          </div>
+          <div class="field">
+            <label>Was the error detected by the employee or someone else?</label>
+            <select id="f-detected">
+              <option value="">Select...</option>
+              <option>Employee themselves</option>
+              <option>Supervisor</option>
+              <option>Quality check</option>
+              <option>Downstream process</option>
+              <option>End customer</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Has this type of error occurred before on this line?</label>
+            <div class="chip-group" id="chip-recurrence">
+              <span class="chip" data-val="yes" onclick="selectChip('chip-recurrence',this)">Yes</span>
+              <span class="chip" data-val="no" onclick="selectChip('chip-recurrence',this)">No</span>
+              <span class="chip" data-val="unknown" onclick="selectChip('chip-recurrence',this)">Unknown</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn primary" onclick="goStep(2)">Continue →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="form-step" id="step2">
+      <div class="form-card">
+        <div class="form-card-header">Root cause investigation</div>
+        <div class="form-card-body">
+          <div class="field">
+            <label>What is the primary root cause? <span class="req">*</span></label>
+            <div class="chip-group" id="chip-rootcause">
+              <span class="chip" data-val="understand" onclick="selectChip('chip-rootcause',this);showBranch()">Employee(s) didn't understand</span>
+              <span class="chip" data-val="careless" onclick="selectChip('chip-rootcause',this);showBranch()">Employee(s) were careless</span>
+              <span class="chip" data-val="noprocess" onclick="selectChip('chip-rootcause',this);showBranch()">No process / SOP exists</span>
+            </div>
+          </div>
+
+          <!-- Branch: understand -->
+          <div class="branch-box" id="branch-understand">
+            <div class="branch-label">Employee understanding — follow-up</div>
+            <div class="field">
+              <label>Was the employee trained &amp; qualified for this task?</label>
+              <div class="chip-group" id="chip-trained">
+                <span class="chip" data-val="yes" onclick="selectChip('chip-trained',this);showDisqBranch()">Yes, trained &amp; qualified</span>
+                <span class="chip" data-val="no" onclick="selectChip('chip-trained',this);showDisqBranch()">No, not yet trained</span>
+              </div>
+            </div>
+            <div class="branch-box" id="branch-disqualify" style="background:#fff3ed;border-color:#e0c4b4">
+              <div class="branch-label" style="color:#6b3018">Disqualification assessment</div>
+              <div class="field">
+                <label>Does this incident meet the criteria for disqualification per SOP?</label>
+                <div class="chip-group" id="chip-disqualify">
+                  <span class="chip" data-val="yes" onclick="selectChip('chip-disqualify',this)">Yes — disqualify per SOP</span>
+                  <span class="chip" data-val="no" onclick="selectChip('chip-disqualify',this)">No — training gap only</span>
+                </div>
+              </div>
+              <div class="field" style="margin-bottom:0">
+                <label>SOP reference number (if applicable)</label>
+                <input type="text" id="f-sop" placeholder="e.g. SOPxxxx">
+              </div>
+            </div>
+          </div>
+
+          <!-- Branch: careless -->
+          <div class="branch-box" id="branch-careless">
+            <div class="branch-label">Careless error — follow-up</div>
+            <div class="field" style="margin-bottom:0">
+              <label>Was this a first occurrence for this employee?</label>
+              <div class="chip-group" id="chip-firstocc">
+                <span class="chip" data-val="yes" onclick="selectChip('chip-firstocc',this)">Yes, first time</span>
+                <span class="chip" data-val="no" onclick="selectChip('chip-firstocc',this)">No, repeated behavior</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Branch: no process -->
+          <div class="branch-box" id="branch-noprocess">
+            <div class="branch-label">No process — follow-up</div>
+            <div class="field" style="margin-bottom:0">
+              <label>Which shifts does the new process need to cover?</label>
+              <div class="chip-group" id="chip-shifts">
+                <span class="chip" data-val="all" onclick="selectChip('chip-shifts',this)">All shifts</span>
+                <span class="chip" data-val="day" onclick="selectChip('chip-shifts',this)">Day only</span>
+                <span class="chip" data-val="affected" onclick="selectChip('chip-shifts',this)">Affected shift only</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="field" style="margin-top:1rem">
+            <label>Investigation notes</label>
+            <textarea id="f-notes" placeholder="Observations, evidence gathered, contributing factors..."></textarea>
+          </div>
+          <div class="field">
+            <label>Immediate containment action taken</label>
+            <textarea id="f-containment" placeholder="What was done right away to prevent further impact?" style="min-height:56px"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" onclick="goStep(1)">← Back</button>
+        <button class="btn primary" onclick="goStep(3)">Continue →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="form-step" id="step3">
+      <div class="form-card">
+        <div class="form-card-header">Incident-specific questions</div>
+        <div class="form-card-body">
+          <p style="font-size:13px;color:var(--text-muted);margin-bottom:1rem">Add any additional questions and answers specific to this incident. These will appear in the final report.</p>
+          <div id="extra-questions"></div>
+          <button class="btn add" onclick="addExtraQuestion()">+ Add question</button>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" onclick="goStep(2)">← Back</button>
+        <button class="btn primary" onclick="goStep(4)">Review →</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: Review + Output -->
+    <div class="form-step" id="step4">
+      <div class="output-wrap" id="review-summary"></div>
+      <div class="output-wrap">
+        <h3>Investigation Flowchart</h3>
+        <div class="flow-container" id="flowchart-area"></div>
+        <div style="margin-top:.75rem">
+          <div style="font-size:11px;color:var(--text-faint);font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem">Determined actions</div>
+          <div class="action-pills" id="action-pills"></div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" onclick="goStep(3)">← Back</button>
+        <button class="btn" onclick="window.print()">Print / Export PDF</button>
+        <button class="btn primary" onclick="submitInvestigation()">Submit Investigation</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════ DETAIL MODAL ══════════════ -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Investigation Detail</div>
+      <button class="modal-close" onclick="document.getElementById('modal-overlay').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ── STORAGE ──
+const STORE_KEY = 'floorwatch_incidents_v1';
+
+function loadIncidents() {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
+  catch(e) { return []; }
+}
+function saveIncidents(arr) {
+  localStorage.setItem(STORE_KEY, JSON.stringify(arr));
+}
+
+let incidents = loadIncidents();
+
+// ── VIEW SWITCHING ──
+function showView(v) {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('view-' + v).classList.add('active');
+  document.getElementById('nav-' + v).classList.add('active');
+  if (v === 'dashboard') { renderDashboard(); }
+  if (v === 'form') { resetForm(); }
+}
+
+// ── FORM STATE ──
+let currentStep = 1;
+let extraQCount = 0;
+
+function selectChip(groupId, el) {
+  document.querySelectorAll('#' + groupId + ' .chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function getChipVal(groupId) {
+  const sel = document.querySelector('#' + groupId + ' .chip.selected');
+  return sel ? sel.dataset.val : '';
+}
+
+function showBranch() {
+  ['branch-understand','branch-careless','branch-noprocess'].forEach(id => {
+    document.getElementById(id).classList.remove('visible');
+  });
+  const rc = getChipVal('chip-rootcause');
+  if (rc) {
+    const map = { understand:'branch-understand', careless:'branch-careless', noprocess:'branch-noprocess' };
+    document.getElementById(map[rc]).classList.add('visible');
+  }
+}
+
+function showDisqBranch() {
+  const trained = getChipVal('chip-trained');
+  const db = document.getElementById('branch-disqualify');
+  trained === 'yes' ? db.classList.add('visible') : db.classList.remove('visible');
+}
+
+function goStep(n) {
+  if (n > currentStep && !validateStep(currentStep)) return;
+  document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step' + n).classList.add('active');
+  document.querySelectorAll('.prog-step').forEach((p, i) => {
+    p.classList.remove('active', 'done');
+    if (i + 1 < n) p.classList.add('done');
+    else if (i + 1 === n) p.classList.add('active');
+  });
+  currentStep = n;
+  if (n === 4) buildReview();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function validateStep(n) {
+  if (n === 1) {
+    const required = ['f-datetime','f-supervisor','f-line','f-employees','f-description'];
+    for (const id of required) {
+      if (!document.getElementById(id).value.trim()) {
+        alert('Please fill in all required fields before continuing.');
+        document.getElementById(id).focus();
+        return false;
+      }
+    }
+  }
+  if (n === 2) {
+    if (!getChipVal('chip-rootcause')) {
+      alert('Please select a root cause before continuing.');
+      return false;
+    }
+  }
+  return true;
+}
+
+function addExtraQuestion() {
+  extraQCount++;
+  const id = 'eq' + extraQCount;
+  const wrap = document.createElement('div');
+  wrap.className = 'extra-q';
+  wrap.id = 'wrap-' + id;
+  wrap.innerHTML = `
+    <div class="extra-q-row">
+      <input type="text" id="${id}-q" placeholder="Question...">
+      <textarea id="${id}-a" placeholder="Answer..."></textarea>
+      <button class="extra-q-remove" onclick="document.getElementById('wrap-${id}').remove()">✕</button>
+    </div>`;
+  document.getElementById('extra-questions').appendChild(wrap);
+}
+
+function getExtraQuestions() {
+  const qs = [];
+  document.querySelectorAll('.extra-q').forEach(wrap => {
+    const qEl = wrap.querySelector('[id$="-q"]');
+    const aEl = wrap.querySelector('[id$="-a"]');
+    if (qEl && aEl && qEl.value.trim()) {
+      qs.push({ q: qEl.value.trim(), a: aEl.value.trim() });
+    }
+  });
+  return qs;
+}
+
+function getActions() {
+  const rc = getChipVal('chip-rootcause');
+  const trained = getChipVal('chip-trained');
+  const disq = getChipVal('chip-disqualify');
+  if (rc === 'careless') return ['Coach / counsel employee'];
+  if (rc === 'noprocess') return ['Establish process and SOP', 'Train all affected shifts'];
+  if (rc === 'understand') {
+    if (trained === 'no') return ['Coach / counsel supervisor', 'Train and qualify employee'];
+    if (trained === 'yes') {
+      if (disq === 'yes') return ['Requalify employee', 'Track through training governance'];
+      if (disq === 'no') return ['Improve existing training'];
+      return ['Assess for disqualification per SOP'];
+    }
+    return ['Determine training status', 'Follow appropriate path'];
+  }
+  return ['Further investigation required'];
+}
+
+const RC_LABELS = {
+  careless: 'Employee(s) were careless',
+  understand: "Employee(s) didn't understand",
+  noprocess: 'No process / SOP exists'
+};
+
+function buildReview() {
+  const rc = getChipVal('chip-rootcause');
+  const trained = getChipVal('chip-trained');
+  const disq = getChipVal('chip-disqualify');
+  const actions = getActions();
+
+  // Summary
+  const sum = document.getElementById('review-summary');
+  sum.innerHTML = `
+    <h3>Investigation Summary</h3>
+    <div class="summary-grid" style="margin-top:.75rem">
+      <div class="summary-item"><span class="sl">Supervisor</span><span class="sv">${v('f-supervisor')}</span></div>
+      <div class="summary-item"><span class="sl">Date / Time</span><span class="sv">${v('f-datetime').replace('T',' ')}</span></div>
+      <div class="summary-item"><span class="sl">Line / Area</span><span class="sv">${v('f-line')}</span></div>
+      <div class="summary-item"><span class="sl">Shift</span><span class="sv">${v('f-shift') || '—'}</span></div>
+      <div class="summary-item"><span class="sl">Employee(s)</span><span class="sv">${v('f-employees')}</span></div>
+      <div class="summary-item"><span class="sl">Delay duration</span><span class="sv">${v('f-delay') || '—'}</span></div>
+      <div class="summary-item"><span class="sl">Root cause</span><span class="sv">${RC_LABELS[rc] || '—'}</span></div>
+      <div class="summary-item"><span class="sl">Detected by</span><span class="sv">${v('f-detected') || '—'}</span></div>
+      <div class="summary-item" style="grid-column:1/-1"><span class="sl">Description</span><span class="sv">${v('f-description')}</span></div>
+      ${v('f-notes') ? `<div class="summary-item" style="grid-column:1/-1"><span class="sl">Notes</span><span class="sv">${v('f-notes')}</span></div>` : ''}
+    </div>`;
+
+  // Flowchart
+  drawFlowchart(rc, trained, disq);
+
+  // Action pills
+  const ap = document.getElementById('action-pills');
+  ap.innerHTML = actions.map(a => `<span class="action-pill">→ ${a}</span>`).join('');
+}
+
+function v(id) {
+  const el = document.getElementById(id);
+  return el ? (el.value || '') : '';
+}
+
+// ── FLOWCHART SVG ──
+function drawFlowchart(rc, trained, disq) {
+  const container = document.getElementById('flowchart-area');
+  const NS = 'http://www.w3.org/2000/svg';
+
+  const W = 580;
+  let H = 420;
+
+  const bg = '#ffffff';
+  const boxFill = '#f7f6f2';
+  const boxStroke = '#c8c4bc';
+  const diamondFill = '#eef3f8';
+  const diamondStroke = '#8aabcc';
+  const actionFill = '#e8f0eb';
+  const actionStroke = '#7db89a';
+  const highlightFill = '#1a3a2a';
+  const textMain = '#1a1916';
+  const textMuted = '#6b6860';
+  const arrowCol = '#9c9890';
+
+  function el(tag, attrs) {
+    const e = document.createElementNS(NS, tag);
+    for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+    return e;
+  }
+
+  function box(svg, x, y, w, h, label, sub, fill, stroke) {
+    const g = document.createElementNS(NS, 'g');
+    const r = el('rect', { x, y, width: w, height: h, rx: 6, fill: fill || boxFill, stroke: stroke || boxStroke, 'stroke-width': '1' });
+    g.appendChild(r);
+    const cy = sub ? y + h / 2 - 8 : y + h / 2;
+    const t = el('text', { x: x + w / 2, y: cy, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': '11', 'font-weight': '500', fill: textMain, 'font-family': 'IBM Plex Sans, sans-serif' });
+    t.textContent = label;
+    g.appendChild(t);
+    if (sub) {
+      const t2 = el('text', { x: x + w / 2, y: y + h / 2 + 9, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': '10', fill: textMuted, 'font-family': 'IBM Plex Sans, sans-serif' });
+      t2.textContent = sub;
+      g.appendChild(t2);
+    }
+    svg.appendChild(g);
+    return { cx: x + w / 2, cy: y + h / 2, top: y, bottom: y + h, left: x, right: x + w, w, h, x, y };
+  }
+
+  function diamond(svg, x, y, w, h, label) {
+    const g = document.createElementNS(NS, 'g');
+    const cx = x + w / 2, cy = y + h / 2;
+    const poly = el('polygon', {
+      points: `${cx},${y} ${x + w},${cy} ${cx},${y + h} ${x},${cy}`,
+      fill: diamondFill, stroke: diamondStroke, 'stroke-width': '1'
+    });
+    g.appendChild(poly);
+    // Handle two-word labels in diamond
+    const words = label.split('\n');
+    if (words.length > 1) {
+      words.forEach((word, i) => {
+        const t = el('text', { x: cx, y: cy + (i - (words.length - 1) / 2) * 13, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': '10', 'font-weight': '500', fill: textMain, 'font-family': 'IBM Plex Sans, sans-serif' });
+        t.textContent = word;
+        g.appendChild(t);
+      });
+    } else {
+      const t = el('text', { x: cx, y: cy, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': '10', 'font-weight': '500', fill: textMain, 'font-family': 'IBM Plex Sans, sans-serif' });
+      t.textContent = label;
+      g.appendChild(t);
+    }
+    svg.appendChild(g);
+    return { cx, cy, top: y, bottom: y + h, left: x, right: x + w, w, h, x, y };
+  }
+
+  function arrow(svg, x1, y1, x2, y2, label, lx, ly) {
+    const line = el('line', { x1, y1, x2, y2, stroke: arrowCol, 'stroke-width': '1', 'marker-end': 'url(#fw-arrow)' });
+    svg.appendChild(line);
+    if (label) {
+      const t = el('text', { x: lx !== undefined ? lx : (x1 + x2) / 2 + 4, y: ly !== undefined ? ly : (y1 + y2) / 2 - 4, 'font-size': '9', fill: textMuted, 'font-family': 'IBM Plex Mono, monospace' });
+      t.textContent = label;
+      svg.appendChild(t);
+    }
+  }
+
+  function path(svg, d) {
+    const p = el('path', { d, fill: 'none', stroke: arrowCol, 'stroke-width': '1', 'marker-end': 'url(#fw-arrow)' });
+    svg.appendChild(p);
+  }
+
+  // Determine height
+  if (rc === 'noprocess') H = 400;
+  else if (rc === 'understand' && trained === 'yes') H = 480;
+  else if (rc === 'understand') H = 400;
+  else H = 340;
+
+  const svg = el('svg', { width: '100%', viewBox: `0 0 ${W} ${H}`, xmlns: NS });
+  const defs = document.createElementNS(NS, 'defs');
+  defs.innerHTML = `<marker id="fw-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="${arrowCol}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>`;
+  svg.appendChild(defs);
+  svg.appendChild(el('rect', { width: W, height: H, fill: bg }));
+
+  // Always: top nodes
+  const inc = box(svg, 190, 14, 200, 36, 'Error causing delay', null, '#e8ecf5', '#8899cc');
+  arrow(svg, 290, 50, 290, 78);
+  const inv = box(svg, 190, 78, 200, 36, 'Investigate same/next shift', null, boxFill, boxStroke);
+  arrow(svg, 290, 114, 290, 146);
+  const rcBox = diamond(svg, 218, 146, 144, 48, 'Root\ncause?');
+
+  if (!rc) {
+    svg.setAttribute('viewBox', `0 0 ${W} 240`);
+    container.innerHTML = '';
+    container.appendChild(svg);
+    return;
+  }
+
+  if (rc === 'careless') {
+    // right branch
+    arrow(svg, 362, 170, 410, 170);
+    box(svg, 410, 152, 140, 36, 'Careless / attitude', null, '#fff4ee', '#d9a080');
+    arrow(svg, 480, 188, 480, 240);
+    box(svg, 410, 240, 140, 38, 'Coach / counsel employee', null, actionFill, actionStroke);
+  }
+
+  if (rc === 'noprocess') {
+    // down center
+    arrow(svg, 290, 194, 290, 240);
+    box(svg, 190, 240, 200, 36, 'No process exists', null, '#fff8e6', '#c8a840');
+    arrow(svg, 290, 276, 290, 316);
+    box(svg, 190, 316, 200, 36, 'Establish process + SOP', null, actionFill, actionStroke);
+    arrow(svg, 290, 352, 290, 388);
+    box(svg, 190, 388, 200, 36, 'Train all shifts', null, actionFill, actionStroke);
+  }
+
+  if (rc === 'understand') {
+    // left branch
+    arrow(svg, 218, 170, 160, 170);
+    box(svg, 36, 152, 124, 36, "Didn't understand", null, '#eef4fb', '#88aacc');
+    arrow(svg, 98, 188, 98, 230);
+    const trDia = diamond(svg, 44, 230, 108, 42, 'Trained?');
+
+    if (!trained) {
+      container.innerHTML = '';
+      container.appendChild(svg);
+      return;
+    }
+
+    if (trained === 'no') {
+      // No-trained left exit
+      path(svg, `M44,251 L16,251 L16,308 L32,308`);
+      const t = el('text', { x: 20, y: 262, 'font-size': '9', fill: textMuted, 'font-family': 'IBM Plex Mono, monospace' });
+      t.textContent = 'No';
+      svg.appendChild(t);
+      box(svg, 32, 290, 132, 36, 'Coach supervisor', null, actionFill, actionStroke);
+      arrow(svg, 98, 290, 98, 270); // re-use arrow going down from trDia bottom
+      // down from yes/no
+      arrow(svg, 98, 272, 98, 290);
+      // actually train employee too
+      arrow(svg, 164, 308, 190, 308);
+      box(svg, 190, 290, 160, 36, 'Train employee', null, actionFill, actionStroke);
+    }
+
+    if (trained === 'yes') {
+      arrow(svg, 98, 272, 98, 316);
+      const t = el('text', { x: 102, y: 296, 'font-size': '9', fill: textMuted, 'font-family': 'IBM Plex Mono, monospace' });
+      t.textContent = 'Yes';
+      svg.appendChild(t);
+      const disqDia = diamond(svg, 44, 316, 108, 44, 'Disqualify\nper SOP?');
+
+      if (!disq) {
+        container.innerHTML = '';
+        container.appendChild(svg);
+        return;
+      }
+
+      if (disq === 'yes') {
+        arrow(svg, 98, 360, 98, 400);
+        const t2 = el('text', { x: 102, y: 382, 'font-size': '9', fill: textMuted, 'font-family': 'IBM Plex Mono, monospace' });
+        t2.textContent = 'Yes';
+        svg.appendChild(t2);
+        box(svg, 32, 400, 132, 36, 'Requalify + track governance', null, actionFill, actionStroke);
+      } else {
+        path(svg, `M44,338 L16,338 L16,402 L32,402`);
+        const t2 = el('text', { x: 8, y: 352, 'font-size': '9', fill: textMuted, 'font-family': 'IBM Plex Mono, monospace' });
+        t2.textContent = 'No';
+        svg.appendChild(t2);
+        box(svg, 32, 384, 132, 36, 'Improve training', null, actionFill, actionStroke);
+      }
+    }
+  }
+
+  container.innerHTML = '';
+  container.appendChild(svg);
+}
+
+// ── SUBMIT ──
+function submitInvestigation() {
+  const rc = getChipVal('chip-rootcause');
+  if (!rc) { alert('Please complete the root cause section.'); return; }
+
+  const record = {
+    id: 'INC-' + String(incidents.length + 1).padStart(4, '0'),
+    timestamp: new Date().toISOString(),
+    datetime: v('f-datetime'),
+    shift: v('f-shift'),
+    supervisor: v('f-supervisor'),
+    line: v('f-line'),
+    employees: v('f-employees'),
+    description: v('f-description'),
+    delay: v('f-delay'),
+    detected: v('f-detected'),
+    recurrence: getChipVal('chip-recurrence'),
+    rootcause: rc,
+    trained: getChipVal('chip-trained'),
+    disqualify: getChipVal('chip-disqualify'),
+    sop: v('f-sop'),
+    firstOccurrence: getChipVal('chip-firstocc'),
+    shiftsAffected: getChipVal('chip-shifts'),
+    notes: v('f-notes'),
+    containment: v('f-containment'),
+    extraQuestions: getExtraQuestions(),
+    actions: getActions()
+  };
+
+  incidents.unshift(record);
+  saveIncidents(incidents);
+  alert(`Investigation ${record.id} submitted successfully.`);
+  showView('dashboard');
+}
+
+// ── RESET FORM ──
+function resetForm() {
+  currentStep = 1;
+  extraQCount = 0;
+  document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step1').classList.add('active');
+  document.querySelectorAll('.prog-step').forEach((p, i) => {
+    p.classList.remove('active','done');
+    if (i === 0) p.classList.add('active');
+  });
+  document.querySelectorAll('.form-card-body input, .form-card-body textarea').forEach(el => { el.value = ''; });
+  document.querySelectorAll('.form-card-body select').forEach(el => { el.selectedIndex = 0; });
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('.branch-box').forEach(b => b.classList.remove('visible'));
+  document.getElementById('extra-questions').innerHTML = '';
+}
+
+// ── DASHBOARD ──
+function renderDashboard() {
+  // Stats
+  const now = new Date();
+  const thisMonth = incidents.filter(i => {
+    const d = new Date(i.timestamp);
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+  document.getElementById('stat-total').textContent = incidents.length;
+  document.getElementById('stat-month').textContent = thisMonth.length;
+  document.getElementById('stat-careless').textContent = incidents.filter(i => i.rootcause === 'careless').length;
+  document.getElementById('stat-training').textContent = incidents.filter(i => i.rootcause === 'understand').length;
+
+  // Line filter options
+  const lines = [...new Set(incidents.map(i => i.line).filter(Boolean))].sort();
+  const lf = document.getElementById('filter-line');
+  lf.innerHTML = '<option value="">All lines</option>' + lines.map(l => `<option>${l}</option>`).join('');
+
+  renderTable();
+}
+
+function renderTable() {
+  const search = document.getElementById('filter-search').value.toLowerCase();
+  const rcFilter = document.getElementById('filter-rc').value;
+  const lineFilter = document.getElementById('filter-line').value;
+
+  let data = incidents.filter(i => {
+    if (rcFilter && i.rootcause !== rcFilter) return false;
+    if (lineFilter && i.line !== lineFilter) return false;
+    if (search) {
+      const hay = [i.supervisor, i.line, i.employees, i.description, i.id].join(' ').toLowerCase();
+      if (!hay.includes(search)) return false;
+    }
+    return true;
+  });
+
+  const tbody = document.getElementById('table-body');
+  const empty = document.getElementById('empty-state');
+
+  if (data.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = data.map(i => `
+    <tr onclick="openDetail('${i.id}')">
+      <td><span style="font-family:var(--mono);font-size:11px;color:var(--text-muted)">${i.id}</span></td>
+      <td>${i.datetime ? i.datetime.replace('T',' ') : new Date(i.timestamp).toLocaleDateString()}</td>
+      <td>${i.line || '—'}</td>
+      <td>${i.supervisor || '—'}</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${i.employees || '—'}</td>
+      <td><span class="badge badge-${i.rootcause}">${RC_LABELS[i.rootcause] || i.rootcause}</span></td>
+      <td style="max-width:200px">${i.actions ? i.actions.join(', ') : '—'}</td>
+    </tr>`).join('');
+}
+
+const RC_LABELS = {
+  careless: 'Careless',
+  understand: "Didn't understand",
+  noprocess: 'No process'
+};
+
+// ── DETAIL MODAL ──
+function openDetail(id) {
+  const inc = incidents.find(i => i.id === id);
+  if (!inc) return;
+
+  document.getElementById('modal-title').textContent = `${inc.id} — ${inc.line || 'Unknown line'}`;
+
+  const rcFull = { careless: 'Employee(s) were careless', understand: "Employee(s) didn't understand", noprocess: 'No process / SOP exists' };
+  const trainedFull = { yes: 'Yes, trained & qualified', no: 'No, not trained' };
+  const disqFull = { yes: 'Yes — disqualify per SOP', no: 'No — training gap only' };
+
+  let extraHTML = '';
+  if (inc.extraQuestions && inc.extraQuestions.length > 0) {
+    extraHTML = `<div class="modal-section">
+      <div class="modal-section-title">Incident-specific questions</div>
+      ${inc.extraQuestions.map(q => `
+        <div class="modal-field"><span class="mfl">${q.q}</span><span class="mfv">${q.a || '—'}</span></div>`).join('')}
+    </div>`;
+  }
+
+  document.getElementById('modal-body').innerHTML = `
+    <div class="modal-section">
+      <div class="modal-section-title">Incident details</div>
+      <div class="modal-field"><span class="mfl">ID</span><span class="mfv" style="font-family:var(--mono)">${inc.id}</span></div>
+      <div class="modal-field"><span class="mfl">Date / Time</span><span class="mfv">${inc.datetime?.replace('T',' ') || '—'}</span></div>
+      <div class="modal-field"><span class="mfl">Shift</span><span class="mfv">${inc.shift || '—'}</span></div>
+      <div class="modal-field"><span class="mfl">Supervisor</span><span class="mfv">${inc.supervisor || '—'}</span></div>
+      <div class="modal-field"><span class="mfl">Line / Area</span><span class="mfv">${inc.line || '—'}</span></div>
+      <div class="modal-field"><span class="mfl">Employee(s)</span><span class="mfv">${inc.employees || '—'}</span></div>
+      <div class="modal-field"><span class="mfl">Delay duration</span><span class="mfv">${inc.delay || '—'}</span></div>
+      <div class="modal-field"><span class="mfl">Detected by</span><span class="mfv">${inc.detected || '—'}</span></div>
+      <div class="modal-field"><span class="mfl">Recurring?</span><span class="mfv">${inc.recurrence || '—'}</span></div>
+      <div class="modal-field"><span class="mfl">Description</span><span class="mfv">${inc.description || '—'}</span></div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">Root cause & investigation</div>
+      <div class="modal-field"><span class="mfl">Root cause</span><span class="mfv">${rcFull[inc.rootcause] || inc.rootcause}</span></div>
+      ${inc.trained ? `<div class="modal-field"><span class="mfl">Trained?</span><span class="mfv">${trainedFull[inc.trained] || inc.trained}</span></div>` : ''}
+      ${inc.disqualify ? `<div class="modal-field"><span class="mfl">Disqualify?</span><span class="mfv">${disqFull[inc.disqualify] || inc.disqualify}</span></div>` : ''}
+      ${inc.sop ? `<div class="modal-field"><span class="mfl">SOP reference</span><span class="mfv" style="font-family:var(--mono)">${inc.sop}</span></div>` : ''}
+      ${inc.containment ? `<div class="modal-field"><span class="mfl">Containment</span><span class="mfv">${inc.containment}</span></div>` : ''}
+      ${inc.notes ? `<div class="modal-field"><span class="mfl">Notes</span><span class="mfv">${inc.notes}</span></div>` : ''}
+    </div>
+    ${extraHTML}
+    <div class="modal-section">
+      <div class="modal-section-title">Determined corrective actions</div>
+      <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.25rem">
+        ${(inc.actions || []).map(a => `<span class="action-pill">→ ${a}</span>`).join('')}
+      </div>
+    </div>`;
+
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal-overlay')) {
+    document.getElementById('modal-overlay').classList.remove('open');
+  }
+}
+
+// Init
+renderDashboard();
+</script>
+</body>
+</html>
