@@ -4,258 +4,247 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Floor Watch — Incident Investigation System</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-msal-browser/3.10.0/msal-browser.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #f4f2ed;
-  --surface: #faf9f6;
-  --surface2: #efede8;
-  --border: #d8d4cc;
-  --border-dark: #b8b4ac;
-  --text: #1a1916;
-  --text-muted: #6b6860;
-  --text-faint: #9c9890;
-  --accent: #1a3a2a;
-  --accent-light: #2d5c42;
-  --accent-pale: #e8f0eb;
-  --warn: #8b3a1a;
-  --warn-pale: #f5ebe6;
-  --info: #1a2e4a;
-  --info-pale: #e6ecf5;
-  --mono: 'IBM Plex Mono', monospace;
-  --sans: 'IBM Plex Sans', sans-serif;
-  --radius: 6px;
-  --radius-lg: 10px;
+  --bg:#f0f2f5;--surface:#ffffff;--surface2:#f7f8fa;
+  --border:#e2e6eb;--border-dark:#c8cdd4;
+  --text:#0f1923;--text-muted:#5a6472;--text-faint:#9aa3ad;
+  --accent:#0057ff;--accent-hover:#0046cc;--accent-pale:#e8f0ff;
+  --open-bg:#fff3cd;--open-text:#7a4800;--open-border:#f5c842;--open-solid:#f5a623;
+  --prog-bg:#cce8ff;--prog-text:#003d8f;--prog-border:#4da6ff;--prog-solid:#0078f0;
+  --closed-bg:#c8f5dc;--closed-text:#0a5c2e;--closed-border:#3dca72;--closed-solid:#16a34a;
+  --rc-careless-bg:#ffe4e4;--rc-careless-text:#8b0000;
+  --rc-understand-bg:#e8e8ff;--rc-understand-text:#2d0091;
+  --rc-noprocess-bg:#fff0d4;--rc-noprocess-text:#6b3a00;
+  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+  --radius:8px;--radius-lg:12px;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);
+  --shadow-md:0 4px 12px rgba(0,0,0,.1);
 }
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; line-height: 1.5; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5}
 
-/* ── AUTH SCREEN ── */
-.auth-screen {
-  display: flex; align-items: center; justify-content: center;
-  min-height: 100vh; flex-direction: column; gap: 1.5rem;
-  background: var(--accent);
-}
-.auth-card {
-  background: #fff; border-radius: 12px; padding: 2.5rem 2rem;
-  max-width: 380px; width: 100%; text-align: center;
-}
-.auth-logo { font-size: 32px; margin-bottom: 1rem; }
-.auth-title { font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: .25rem; }
-.auth-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 1.5rem; }
-.auth-btn {
-  width: 100%; padding: .75rem; border-radius: var(--radius);
-  background: var(--accent); color: #fff; border: none;
-  font-family: var(--sans); font-size: 14px; font-weight: 500;
-  cursor: pointer; transition: .15s; display: flex; align-items: center;
-  justify-content: center; gap: 8px;
-}
-.auth-btn:hover { background: var(--accent-light); }
-.auth-error { font-size: 12px; color: var(--warn); margin-top: .75rem; display: none; }
-
-/* ── LOADING ── */
-.loading-screen {
-  display: none; align-items: center; justify-content: center;
-  min-height: 100vh; flex-direction: column; gap: 1rem;
-}
-.loading-screen.visible { display: flex; }
-.spinner {
-  width: 36px; height: 36px; border: 3px solid var(--border);
-  border-top-color: var(--accent); border-radius: 50%;
-  animation: spin .8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.loading-msg { font-size: 13px; color: var(--text-muted); font-family: var(--mono); }
+/* ── LOADING / AUTH ── */
+.splash{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg)}
+.splash-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2.5rem 2rem;max-width:400px;width:100%;text-align:center;box-shadow:var(--shadow-md)}
+.splash-logo{width:52px;height:52px;background:var(--accent);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem}
+.splash-title{font-size:22px;font-weight:700;margin-bottom:.25rem}
+.splash-sub{font-size:13px;color:var(--text-muted);margin-bottom:1.5rem}
+.splash-spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto .75rem}
+.splash-msg{font-size:13px;color:var(--text-muted);font-family:var(--mono)}
+.splash-error{font-size:13px;color:#c62828;margin-top:.75rem;padding:.75rem;background:#fff0f0;border-radius:var(--radius);border:1px solid #ffb3b3;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
 
 /* ── HEADER ── */
-.header {
-  background: var(--accent); color: #fff; padding: 0 2rem;
-  display: flex; align-items: center; justify-content: space-between;
-  height: 56px; position: sticky; top: 0; z-index: 100;
-}
-.header-brand { display: flex; align-items: center; gap: 10px; }
-.header-brand .logo {
-  width: 28px; height: 28px; background: rgba(255,255,255,0.15);
-  border-radius: 4px; display: flex; align-items: center; justify-content: center;
-}
-.brand-name { font-size: 13px; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; }
-.brand-sub { font-size: 11px; color: rgba(255,255,255,0.55); font-family: var(--mono); }
-.header-right { display: flex; align-items: center; gap: 1rem; }
-.header-user { font-size: 12px; color: rgba(255,255,255,0.7); font-family: var(--mono); }
-.header-nav { display: flex; gap: 4px; }
-.nav-btn {
-  padding: 6px 14px; border-radius: var(--radius); border: none;
-  background: transparent; color: rgba(255,255,255,0.65);
-  font-family: var(--sans); font-size: 13px; cursor: pointer; transition: .15s;
-}
-.nav-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
-.nav-btn.active { background: rgba(255,255,255,0.18); color: #fff; font-weight: 500; }
+.header{background:#0f1923;color:#fff;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:58px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.header-brand{display:flex;align-items:center;gap:12px}
+.logo{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.brand-name{font-size:14px;font-weight:600;letter-spacing:.02em}
+.brand-sub{font-size:11px;color:rgba(255,255,255,.45);font-family:var(--mono)}
+.header-right{display:flex;align-items:center;gap:1rem}
+.header-user{font-size:12px;color:rgba(255,255,255,.55);font-family:var(--mono)}
+.header-nav{display:flex;gap:6px}
+.nav-btn{padding:7px 16px;border-radius:var(--radius);border:none;background:transparent;color:rgba(255,255,255,.6);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;transition:.15s}
+.nav-btn:hover{background:rgba(255,255,255,.1);color:#fff}
+.nav-btn.active{background:var(--accent);color:#fff}
 
 /* ── VIEWS ── */
-.view { display: none; }
-.view.active { display: block; }
+.view{display:none}.view.active{display:block}
 
-/* ── DASHBOARD ── */
-.dash-header { padding: 2rem 2rem 1rem; border-bottom: 1px solid var(--border); background: var(--surface); }
-.dash-title { font-size: 22px; font-weight: 600; }
-.dash-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
-.stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; padding: 1.5rem 2rem; }
-.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; }
-.stat-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .06em; color: var(--text-faint); margin-bottom: .5rem; font-family: var(--mono); }
-.stat-val { font-size: 28px; font-weight: 600; color: var(--text); line-height: 1; }
-.stat-val.accent { color: var(--accent); }
-.stat-val.warn { color: var(--warn); }
-.dash-body { padding: 0 2rem 2rem; }
-.section-title { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .07em; color: var(--text-faint); font-family: var(--mono); padding: 1.25rem 0 .75rem; border-bottom: 1px solid var(--border); margin-bottom: 1rem; }
-.filter-bar { display: flex; gap: .75rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; }
-.filter-bar select, .filter-bar input { border: 1px solid var(--border); border-radius: var(--radius); padding: .35rem .75rem; font-family: var(--sans); font-size: 13px; background: var(--surface); color: var(--text); outline: none; }
-.filter-bar select:focus, .filter-bar input:focus { border-color: var(--accent); }
-.incident-table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; font-size: 13px; }
-.incident-table th { text-align: left; padding: .625rem 1rem; background: var(--surface2); font-family: var(--mono); font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); border-bottom: 1px solid var(--border); white-space: nowrap; }
-.incident-table td { padding: .75rem 1rem; border-bottom: 1px solid var(--border); vertical-align: top; }
-.incident-table tr:last-child td { border-bottom: none; }
-.incident-table tr.data-row:hover td { background: var(--surface2); cursor: pointer; }
-.badge { display: inline-block; font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 10px; font-family: var(--mono); text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
-.badge-careless { background: var(--warn-pale); color: var(--warn); }
-.badge-understand { background: var(--info-pale); color: var(--info); }
-.badge-noprocess { background: #f0ebd8; color: #6b5020; }
-.empty-state { text-align: center; padding: 3rem 2rem; color: var(--text-muted); }
-.empty-state .es-icon { font-size: 32px; margin-bottom: .75rem; opacity: .4; }
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;border:1.5px solid transparent}
+.badge::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+.badge-open{background:var(--open-bg);color:var(--open-text);border-color:var(--open-border)}
+.badge-inprogress{background:var(--prog-bg);color:var(--prog-text);border-color:var(--prog-border)}
+.badge-closed{background:var(--closed-bg);color:var(--closed-text);border-color:var(--closed-border)}
+.badge-careless{background:var(--rc-careless-bg);color:var(--rc-careless-text)}
+.badge-understand{background:var(--rc-understand-bg);color:var(--rc-understand-text)}
+.badge-noprocess{background:var(--rc-noprocess-bg);color:var(--rc-noprocess-text)}
+
+/* ── DASHBOARD HEADER ── */
+.dash-header{padding:2rem 2rem 1.25rem;background:var(--surface);border-bottom:1px solid var(--border)}
+.dash-title{font-size:24px;font-weight:600}
+.dash-sub{font-size:13px;color:var(--text-muted);margin-top:3px}
+
+/* ── STAT CARDS ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;padding:1.5rem 2rem}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px}
+.stat-card.s-total::before{background:var(--accent)}
+.stat-card.s-open::before{background:var(--open-solid)}
+.stat-card.s-prog::before{background:var(--prog-solid)}
+.stat-card.s-closed::before{background:var(--closed-solid)}
+.stat-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:var(--text-faint);margin-bottom:.5rem;font-family:var(--mono)}
+.stat-val{font-size:32px;font-weight:700;line-height:1;color:var(--text)}
+
+/* ── CHARTS ── */
+.charts-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;padding:0 2rem 1.5rem}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;box-shadow:var(--shadow)}
+.chart-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);font-family:var(--mono);margin-bottom:1rem}
+.bar-chart{display:flex;flex-direction:column;gap:.5rem}
+.bar-row{display:flex;align-items:center;gap:.75rem;font-size:12px}
+.bar-label{width:95px;color:var(--text-muted);font-size:11px;text-align:right;flex-shrink:0;font-family:var(--mono)}
+.bar-track{flex:1;height:22px;background:var(--bg);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .5s ease;display:flex;align-items:center;padding-left:8px;min-width:24px}
+.bar-count{font-size:11px;font-weight:700;color:#fff;font-family:var(--mono)}
+.donut-wrap{display:flex;align-items:center;gap:1.25rem}
+.donut-legend{display:flex;flex-direction:column;gap:.5rem;flex:1}
+.legend-item{display:flex;align-items:center;gap:.5rem;font-size:12px;color:var(--text-muted)}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.legend-val{font-weight:700;color:var(--text);font-family:var(--mono);margin-left:auto}
+
+/* ── DASH BODY ── */
+.dash-body{padding:0 2rem 2rem}
+.section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-faint);font-family:var(--mono);padding:1.25rem 0 .75rem;border-bottom:2px solid var(--border);margin-bottom:1rem}
+.filter-bar{display:flex;gap:.75rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap}
+.filter-bar select,.filter-bar input{border:1.5px solid var(--border);border-radius:var(--radius);padding:.4rem .75rem;font-family:var(--sans);font-size:13px;background:var(--surface);color:var(--text);outline:none;transition:.15s}
+.filter-bar select:focus,.filter-bar input:focus{border-color:var(--accent)}
+.btn-sm{padding:.35rem .875rem;border-radius:var(--radius);font-family:var(--sans);font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid var(--border-dark);background:var(--surface);color:var(--text);transition:.15s}
+.btn-sm:hover{background:var(--surface2)}
+
+/* ── TABLE ── */
+.incident-table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;font-size:13px;box-shadow:var(--shadow)}
+.incident-table th{text-align:left;padding:.7rem 1rem;background:#f7f8fa;font-family:var(--mono);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);border-bottom:2px solid var(--border);white-space:nowrap}
+.incident-table td{padding:.75rem 1rem;border-bottom:1px solid var(--border);vertical-align:middle}
+.incident-table tr:last-child td{border-bottom:none}
+.incident-table tr.data-row:hover td{background:#f0f4ff;cursor:pointer}
+.empty-state{text-align:center;padding:3rem 2rem;color:var(--text-muted);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow)}
+.empty-state .es-icon{font-size:36px;margin-bottom:.75rem;opacity:.4}
 
 /* ── FORM ── */
-.form-layout { max-width: 760px; margin: 0 auto; padding: 2rem; }
-.form-header { margin-bottom: 1.75rem; }
-.form-header h1 { font-size: 20px; font-weight: 600; }
-.form-header p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
-.progress-bar { display: flex; gap: 0; margin-bottom: 2rem; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--surface2); }
-.prog-step { flex: 1; padding: .5rem .75rem; font-size: 11px; font-family: var(--mono); color: var(--text-faint); text-align: center; transition: .2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.prog-step.done { background: var(--accent-pale); color: var(--accent); }
-.prog-step.active { background: var(--accent); color: #fff; font-weight: 500; }
-.form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 1rem; overflow: hidden; }
-.form-card-header { padding: .75rem 1.25rem; background: var(--surface2); border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); }
-.form-card-body { padding: 1.25rem; }
-.field { margin-bottom: 1.1rem; }
-.field:last-child { margin-bottom: 0; }
-.field label { display: block; font-size: 12px; font-weight: 500; color: var(--text-muted); margin-bottom: .35rem; text-transform: uppercase; letter-spacing: .04em; font-family: var(--mono); }
-.field label .req { color: var(--warn); margin-left: 2px; }
-.field input, .field select, .field textarea { width: 100%; padding: .5rem .75rem; border: 1px solid var(--border); border-radius: var(--radius); font-family: var(--sans); font-size: 14px; color: var(--text); background: var(--surface); transition: border-color .15s; outline: none; resize: vertical; }
-.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); }
-.field textarea { min-height: 72px; }
-.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-.field-readonly { padding: .5rem .75rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface2); font-size: 14px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
-.field-readonly .avatar { width: 22px; height: 22px; border-radius: 50%; background: var(--accent-pale); color: var(--accent); font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.chip-group { display: flex; flex-wrap: wrap; gap: .5rem; }
-.chip { padding: .375rem .875rem; border: 1px solid var(--border-dark); border-radius: 20px; font-size: 13px; color: var(--text-muted); cursor: pointer; transition: .15s; background: var(--surface); user-select: none; }
-.chip:hover { border-color: var(--accent); color: var(--accent); }
-.chip.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
-.branch-box { background: var(--info-pale); border: 1px solid #c0cfe6; border-radius: var(--radius); padding: 1rem 1.25rem; margin-top: .75rem; display: none; }
-.branch-box.visible { display: block; }
-.branch-box .branch-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .05em; color: var(--info); font-family: var(--mono); margin-bottom: .75rem; }
-.extra-q { margin-bottom: .75rem; }
-.extra-q-row { display: flex; gap: .5rem; align-items: flex-start; }
-.extra-q-row input { flex: 2; }
-.extra-q-row textarea { flex: 3; min-height: 52px; }
-.extra-q-remove { width: 28px; height: 36px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface2); color: var(--text-muted); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: .15s; }
-.extra-q-remove:hover { background: var(--warn-pale); color: var(--warn); border-color: var(--warn); }
-.btn-row { display: flex; gap: .75rem; justify-content: flex-end; margin-top: 1.5rem; }
-.btn { padding: .5rem 1.25rem; border-radius: var(--radius); font-family: var(--sans); font-size: 13px; font-weight: 500; cursor: pointer; transition: .15s; border: 1px solid var(--border-dark); background: var(--surface); color: var(--text); }
-.btn:hover { background: var(--surface2); }
-.btn:disabled { opacity: .5; cursor: not-allowed; }
-.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-.btn.primary:hover { background: var(--accent-light); }
-.btn.add { background: transparent; border: 1px dashed var(--border-dark); color: var(--text-muted); font-size: 12px; }
-.btn.add:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-pale); }
-.form-step { display: none; }
-.form-step.active { display: block; }
+.form-layout{max-width:620px;margin:0 auto;padding:2rem}
+.form-header{margin-bottom:1.75rem}
+.form-header h1{font-size:22px;font-weight:600}
+.form-header p{font-size:13px;color:var(--text-muted);margin-top:4px}
+.form-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:1rem;overflow:hidden;box-shadow:var(--shadow)}
+.form-card-header{padding:.8rem 1.25rem;background:#f7f8fa;border-bottom:2px solid var(--border);font-family:var(--mono);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)}
+.form-card-body{padding:1.25rem}
+.field{margin-bottom:1.1rem}
+.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.05em;font-family:var(--mono)}
+.field label .req{color:#e53935;margin-left:2px}
+.field input,.field select,.field textarea{width:100%;padding:.55rem .875rem;border:1.5px solid var(--border);border-radius:var(--radius);font-family:var(--sans);font-size:14px;color:var(--text);background:var(--surface);transition:border-color .15s;outline:none;resize:vertical}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,87,255,.1)}
+.field textarea{min-height:72px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.field-readonly{padding:.55rem .875rem;border:1.5px solid var(--border);border-radius:var(--radius);background:var(--surface2);font-size:14px;color:var(--text-muted);display:flex;align-items:center;gap:8px}
+.avatar{width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 
-/* ── PEOPLE PICKER ── */
-.people-picker { position: relative; }
-.people-picker-input-wrap { display: flex; flex-wrap: wrap; gap: 4px; padding: .375rem .5rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); min-height: 38px; align-items: center; cursor: text; }
-.people-picker-input-wrap:focus-within { border-color: var(--accent); }
-.person-tag { display: flex; align-items: center; gap: 4px; background: var(--accent-pale); border: 1px solid #b8d4c2; border-radius: 12px; padding: 2px 8px 2px 4px; font-size: 12px; color: var(--accent); white-space: nowrap; }
-.person-tag .ptav { width: 18px; height: 18px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; }
-.person-tag .pt-remove { cursor: pointer; color: var(--accent-light); margin-left: 2px; font-size: 14px; line-height: 1; }
-.people-picker-input { border: none; outline: none; font-family: var(--sans); font-size: 13px; color: var(--text); background: transparent; min-width: 120px; flex: 1; padding: 2px 4px; }
-.people-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); z-index: 50; box-shadow: 0 4px 12px rgba(0,0,0,.08); display: none; max-height: 200px; overflow-y: auto; }
-.people-dropdown.open { display: block; }
-.people-option { padding: .5rem .75rem; cursor: pointer; display: flex; align-items: center; gap: .5rem; font-size: 13px; }
-.people-option:hover { background: var(--surface2); }
-.people-option .poav { width: 24px; height: 24px; border-radius: 50%; background: var(--accent-pale); color: var(--accent); font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.people-option .po-name { font-weight: 500; }
-.people-option .po-email { font-size: 11px; color: var(--text-faint); font-family: var(--mono); }
-.people-searching { padding: .75rem; font-size: 12px; color: var(--text-muted); text-align: center; font-family: var(--mono); }
+/* ── CHIPS ── */
+.chip-group{display:flex;flex-wrap:wrap;gap:.5rem}
+.chip{padding:.4rem 1rem;border:1.5px solid var(--border-dark);border-radius:20px;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;transition:.15s;background:var(--surface);user-select:none}
+.chip:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-pale)}
+.chip.selected{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 2px 6px rgba(0,87,255,.3)}
 
-/* ── OUTPUT ── */
-.output-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1rem; }
-.output-wrap h3 { font-size: 14px; font-weight: 600; margin-bottom: 1rem; }
-.summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem 1.5rem; margin-bottom: 1.25rem; }
-.summary-item { font-size: 13px; }
-.summary-item .sl { color: var(--text-faint); font-family: var(--mono); font-size: 11px; display: block; margin-bottom: 1px; }
-.summary-item .sv { color: var(--text); font-weight: 500; }
-.flow-container { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: #fff; }
-.flow-container svg { display: block; width: 100%; }
-.action-pills { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .75rem; }
-.action-pill { background: var(--accent-pale); border: 1px solid #b8d4c2; border-radius: 20px; padding: .35rem .875rem; font-size: 12px; color: var(--accent); font-weight: 500; }
+/* ── BRANCH BOXES ── */
+.branch-box{background:#f5f8ff;border:1.5px solid #b3ccff;border-radius:var(--radius);padding:1rem 1.25rem;margin-top:.75rem;display:none}
+.branch-box.visible{display:block}
+.branch-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--accent);font-family:var(--mono);margin-bottom:.75rem}
+
+/* ── BUTTONS ── */
+.btn-row{display:flex;gap:.75rem;justify-content:flex-end;margin-top:1.5rem}
+.btn{padding:.55rem 1.25rem;border-radius:var(--radius);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;transition:.15s;border:1.5px solid var(--border-dark);background:var(--surface);color:var(--text)}
+.btn:hover{background:var(--surface2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 2px 6px rgba(0,87,255,.3)}
+.btn.primary:hover{background:var(--accent-hover)}
+.btn.add{background:transparent;border:1.5px dashed var(--border-dark);color:var(--text-muted);font-size:12px}
+.btn.add:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-pale)}
+
+/* ── EXTRA Q ── */
+.extra-q{margin-bottom:.75rem}
+.extra-q-row{display:flex;gap:.5rem;align-items:flex-start}
+.extra-q-row input{flex:2}
+.extra-q-row textarea{flex:3;min-height:52px}
+.extra-q-remove{width:30px;height:38px;border:1.5px solid var(--border);border-radius:var(--radius);background:var(--surface2);color:var(--text-muted);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.15s}
+.extra-q-remove:hover{background:#ffe4e4;color:#e53935;border-color:#e53935}
 
 /* ── MODAL ── */
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 200; align-items: center; justify-content: center; padding: 1rem; }
-.modal-overlay.open { display: flex; }
-.modal { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); max-width: 680px; width: 100%; max-height: 90vh; overflow-y: auto; }
-.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface); z-index: 1; }
-.modal-title { font-size: 15px; font-weight: 600; }
-.modal-close { width: 28px; height: 28px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface2); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); transition: .15s; }
-.modal-close:hover { background: var(--warn-pale); color: var(--warn); }
-.modal-body { padding: 1.5rem; }
-.modal-section { margin-bottom: 1.5rem; }
-.modal-section-title { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: .07em; color: var(--text-faint); font-family: var(--mono); margin-bottom: .75rem; padding-bottom: .4rem; border-bottom: 1px solid var(--border); }
-.modal-field { margin-bottom: .6rem; font-size: 13px; display: flex; gap: .75rem; }
-.modal-field .mfl { color: var(--text-muted); min-width: 130px; font-family: var(--mono); font-size: 11px; padding-top: 1px; flex-shrink: 0; }
-.modal-field .mfv { color: var(--text); font-weight: 500; }
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,25,35,.6);z-index:200;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto;backdrop-filter:blur(2px)}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);width:100%;max-width:840px;margin:auto;box-shadow:var(--shadow-md)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:2px solid var(--border);background:#f7f8fa;border-radius:var(--radius-lg) var(--radius-lg) 0 0}
+.modal-title-wrap{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+.modal-title{font-size:17px;font-weight:700}
+.modal-close{width:30px;height:30px;border:1.5px solid var(--border);border-radius:var(--radius);background:var(--surface);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:.15s}
+.modal-close:hover{background:#ffe4e4;color:#e53935;border-color:#e53935}
+.modal-body{padding:1.5rem}
+
+/* ── MODAL INTERNALS ── */
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem 1.5rem;margin-bottom:1.25rem}
+.detail-item .dl{color:var(--text-faint);font-family:var(--mono);font-size:10px;font-weight:600;display:block;margin-bottom:2px;text-transform:uppercase;letter-spacing:.05em}
+.detail-item .dv{color:var(--text);font-weight:500;font-size:13px}
+.locked-banner{background:#fffbeb;border:1.5px solid #fbbf24;border-radius:var(--radius);padding:.6rem 1rem;font-size:12px;color:#78350f;font-family:var(--mono);margin-bottom:1.25rem;display:flex;align-items:center;gap:.5rem}
+.section-divider{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);font-family:var(--mono);margin:1.5rem 0 1rem;padding-bottom:.5rem;border-bottom:2px solid var(--border)}
+
+/* ── STATUS STEPPER ── */
+.status-stepper{display:flex;margin-bottom:1.5rem;border-radius:var(--radius);overflow:hidden;border:2px solid var(--border)}
+.status-step{flex:1;display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.7rem 1rem;font-size:12px;font-weight:600;color:var(--text-muted);font-family:var(--mono);cursor:pointer;transition:.2s;background:var(--surface2);text-transform:uppercase;letter-spacing:.04em}
+.status-step:not(:last-child){border-right:2px solid var(--border)}
+.status-step:hover:not([class*="active"]){background:var(--bg)}
+.status-dot{width:8px;height:8px;border-radius:50%;background:currentColor;flex-shrink:0}
+.status-step.active-open{background:var(--open-bg);color:var(--open-text)}
+.status-step.active-inprogress{background:var(--prog-bg);color:var(--prog-text)}
+.status-step.active-closed{background:var(--closed-bg);color:var(--closed-text)}
+
+/* ── FLOWCHART ── */
+.flow-container{border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;background:#fafcff;margin-top:.75rem}
+.flow-container svg{display:block;width:100%}
+.action-pills{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.75rem}
+.action-pill{background:#e8f5ec;border:1.5px solid #86c99a;border-radius:20px;padding:.35rem .875rem;font-size:12px;color:#0a5c2e;font-weight:600}
+.no-investigation{background:var(--surface2);border:1.5px dashed var(--border-dark);border-radius:var(--radius);padding:1.5rem;text-align:center;color:var(--text-muted);font-size:13px;margin-top:.75rem}
+
+/* ── SAVING INDICATOR ── */
+.saving-indicator{display:none;font-size:12px;color:var(--text-muted);font-family:var(--mono);align-items:center;gap:.5rem}
+.saving-indicator.visible{display:flex}
+.saving-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
 /* ── TOAST ── */
-.toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--text); color: #fff; padding: .75rem 1.25rem; border-radius: var(--radius); font-size: 13px; z-index: 500; transform: translateY(80px); opacity: 0; transition: .3s; pointer-events: none; }
-.toast.show { transform: translateY(0); opacity: 1; }
-.toast.error { background: var(--warn); }
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:#0f1923;color:#fff;padding:.75rem 1.25rem;border-radius:var(--radius);font-size:13px;z-index:500;transform:translateY(80px);opacity:0;transition:.3s;pointer-events:none;box-shadow:var(--shadow-md)}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.error{background:#c62828}
+.toast.success{background:#166534}
 
-@media (max-width: 640px) {
-  .stats-row { grid-template-columns: 1fr 1fr; }
-  .field-row { grid-template-columns: 1fr; }
-  .summary-grid { grid-template-columns: 1fr; }
-  .form-layout { padding: 1rem; }
-  .dash-body { padding: 0 1rem 1rem; }
-  .stats-row { padding: 1rem; }
+@media(max-width:700px){
+  .stats-row{grid-template-columns:1fr 1fr}
+  .charts-row{grid-template-columns:1fr}
+  .field-row{grid-template-columns:1fr}
+  .detail-grid{grid-template-columns:1fr}
+  .form-layout{padding:1rem}
+  .dash-body,.stats-row,.charts-row{padding-left:1rem;padding-right:1rem}
+  .status-stepper{flex-direction:column}
+  .status-step:not(:last-child){border-right:none;border-bottom:2px solid var(--border)}
 }
 </style>
 </head>
 <body>
 
-<!-- AUTH SCREEN -->
-<div class="auth-screen" id="auth-screen">
-  <div class="auth-card">
-    <div class="auth-logo">⬡</div>
-    <div class="auth-title">Floor Watch</div>
-    <div class="auth-sub">Incident Investigation System<br>Sign in with your ThermoFisher Microsoft account to continue.</div>
-    <button class="auth-btn" onclick="signIn()">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6.5" height="6.5" fill="#f25022"/><rect x="8.5" y="1" width="6.5" height="6.5" fill="#7fba00"/><rect x="1" y="8.5" width="6.5" height="6.5" fill="#00a4ef"/><rect x="8.5" y="8.5" width="6.5" height="6.5" fill="#ffb900"/></svg>
-      Sign in with Microsoft
-    </button>
-    <div class="auth-error" id="auth-error">Sign-in failed. Please try again.</div>
+<!-- ══════════════════════════════════════════
+     SPLASH / LOADING SCREEN
+══════════════════════════════════════════ -->
+<div class="splash" id="splash">
+  <div class="splash-card">
+    <div class="splash-logo">
+      <svg viewBox="0 0 16 16" fill="none" width="24" height="24"><path d="M8 2L14 5.5V10.5L8 14L2 10.5V5.5L8 2Z" stroke="white" stroke-width="1.4"/><circle cx="8" cy="8" r="2.2" fill="white"/></svg>
+    </div>
+    <div class="splash-title">Floor Watch</div>
+    <div class="splash-sub">South Ops — People Management</div>
+    <div class="splash-spinner" id="splash-spinner"></div>
+    <div class="splash-msg" id="splash-msg">Connecting to SharePoint...</div>
+    <div class="splash-error" id="splash-error"></div>
   </div>
 </div>
 
-<!-- LOADING -->
-<div class="loading-screen" id="loading-screen">
-  <div class="spinner"></div>
-  <div class="loading-msg" id="loading-msg">Connecting to SharePoint...</div>
-</div>
-
-<!-- MAIN APP -->
+<!-- ══════════════════════════════════════════
+     MAIN APP
+══════════════════════════════════════════ -->
 <div id="main-app" style="display:none">
+
   <div class="header">
     <div class="header-brand">
       <div class="logo">
-        <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><path d="M8 2L14 5.5V10.5L8 14L2 10.5V5.5L8 2Z" stroke="white" stroke-width="1.2"/><circle cx="8" cy="8" r="2" fill="white"/></svg>
+        <svg viewBox="0 0 16 16" fill="none" width="18" height="18"><path d="M8 2L14 5.5V10.5L8 14L2 10.5V5.5L8 2Z" stroke="white" stroke-width="1.4"/><circle cx="8" cy="8" r="2.2" fill="white"/></svg>
       </div>
       <div>
         <div class="brand-name">Floor Watch</div>
@@ -266,267 +255,145 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); min-
       <div class="header-user" id="header-user"></div>
       <div class="header-nav">
         <button class="nav-btn active" onclick="showView('dashboard')" id="nav-dashboard">Dashboard</button>
-        <button class="nav-btn" onclick="showView('form')" id="nav-form">New Investigation</button>
+        <button class="nav-btn" onclick="showView('report')" id="nav-report">Report Incident</button>
       </div>
     </div>
   </div>
 
-  <!-- DASHBOARD -->
+  <!-- ══════ DASHBOARD ══════ -->
   <div class="view active" id="view-dashboard">
     <div class="dash-header">
       <div class="dash-title">Incident Dashboard</div>
-      <div class="dash-sub">All submitted investigations — visible to supervisors and stakeholders</div>
+      <div class="dash-sub">Click any incident to view details or continue the investigation</div>
     </div>
     <div class="stats-row">
-      <div class="stat-card"><div class="stat-label">Total Incidents</div><div class="stat-val accent" id="stat-total">—</div></div>
-      <div class="stat-card"><div class="stat-label">This Month</div><div class="stat-val" id="stat-month">—</div></div>
-      <div class="stat-card"><div class="stat-label">Careless Errors</div><div class="stat-val warn" id="stat-careless">—</div></div>
-      <div class="stat-card"><div class="stat-label">Training Gaps</div><div class="stat-val" id="stat-training">—</div></div>
+      <div class="stat-card s-total"><div class="stat-label">Total Incidents</div><div class="stat-val" id="stat-total">—</div></div>
+      <div class="stat-card s-open"><div class="stat-label">Open</div><div class="stat-val" id="stat-open">—</div></div>
+      <div class="stat-card s-prog"><div class="stat-label">In Progress</div><div class="stat-val" id="stat-inprogress">—</div></div>
+      <div class="stat-card s-closed"><div class="stat-label">Closed</div><div class="stat-val" id="stat-closed">—</div></div>
+    </div>
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">Status Breakdown</div>
+        <div class="donut-wrap">
+          <canvas id="chart-donut" width="90" height="90"></canvas>
+          <div class="donut-legend" id="donut-legend"></div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Root Cause Distribution</div>
+        <div class="bar-chart" id="chart-rc"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Incidents by Line</div>
+        <div class="bar-chart" id="chart-line"></div>
+      </div>
     </div>
     <div class="dash-body">
       <div class="section-title">Investigation Log</div>
       <div class="filter-bar">
-        <input type="text" id="filter-search" placeholder="Search employee, line, supervisor..." oninput="renderTable()" style="width:240px">
-        <select id="filter-rc" onchange="renderTable()">
-          <option value="">All root causes</option>
-          <option value="understand">Didn't understand</option>
-          <option value="careless">Careless</option>
-          <option value="noprocess">No process exists</option>
+        <input type="text" id="filter-search" placeholder="Search line, supervisor, employee..." oninput="renderTable()" style="width:220px">
+        <select id="filter-status" onchange="renderTable()">
+          <option value="">All statuses</option>
+          <option value="open">Open</option>
+          <option value="inprogress">In Progress</option>
+          <option value="closed">Closed</option>
         </select>
         <select id="filter-line" onchange="renderTable()">
           <option value="">All lines</option>
           <option>Line 5</option><option>Line 7</option><option>PFS2</option><option>PFS3</option>
         </select>
-        <button class="btn" onclick="loadIncidents()" style="font-size:12px">↻ Refresh</button>
+        <select id="filter-rc" onchange="renderTable()">
+          <option value="">All root causes</option>
+          <option value="understand">Didn't understand</option>
+          <option value="careless">Careless</option>
+          <option value="noprocess">No process</option>
+        </select>
+        <button class="btn-sm" onclick="loadFromSharePoint()">↻ Refresh</button>
       </div>
-      <table class="incident-table" id="incident-table">
+      <table class="incident-table">
         <thead>
-          <tr>
-            <th>ID</th><th>Date</th><th>Line</th><th>Supervisor</th>
-            <th>Employee(s)</th><th>Root Cause</th><th>Actions</th>
-          </tr>
+          <tr><th>ID</th><th>Reported</th><th>Shift</th><th>Line</th><th>Supervisor</th><th>Description</th><th>Status</th><th>Root Cause</th></tr>
         </thead>
         <tbody id="table-body"></tbody>
       </table>
       <div class="empty-state" id="empty-state" style="display:none">
         <div class="es-icon">📋</div>
-        <p>No investigations found.<br>Use <strong>New Investigation</strong> to log an incident.</p>
+        <p>No incidents yet. Use <strong>Report Incident</strong> to log one.</p>
       </div>
     </div>
   </div>
 
-  <!-- FORM -->
-  <div class="view" id="view-form">
+  <!-- ══════ REPORT INCIDENT ══════ -->
+  <div class="view" id="view-report">
     <div class="form-layout">
       <div class="form-header">
-        <h1>New Incident Investigation</h1>
-        <p>Complete all steps. The investigation flowchart is generated automatically.</p>
+        <h1>Report an Incident</h1>
+        <p>Fill in the basic details. The assigned supervisor will complete the investigation.</p>
       </div>
-      <div class="progress-bar">
-        <div class="prog-step active" id="ps1">1 · Incident</div>
-        <div class="prog-step" id="ps2">2 · Root Cause</div>
-        <div class="prog-step" id="ps3">3 · Custom Qs</div>
-        <div class="prog-step" id="ps4">4 · Review</div>
-      </div>
-
-      <!-- STEP 1 -->
-      <div class="form-step active" id="step1">
-        <div class="form-card">
-          <div class="form-card-header">Incident details</div>
-          <div class="form-card-body">
-            <div class="field-row">
-              <div class="field">
-                <label>Date &amp; Time <span class="req">*</span></label>
-                <input type="datetime-local" id="f-datetime">
-              </div>
-              <div class="field">
-                <label>Shift <span class="req">*</span></label>
-                <select id="f-shift">
-                  <option value="">Select shift</option>
-                  <option>A</option><option>B</option><option>C</option><option>D</option>
-                </select>
-              </div>
+      <div class="form-card">
+        <div class="form-card-header">Incident details</div>
+        <div class="form-card-body">
+          <div class="field">
+            <label>Date &amp; Time <span class="req">*</span></label>
+            <input type="datetime-local" id="r-datetime">
+          </div>
+          <div class="field">
+            <label>Shift <span class="req">*</span></label>
+            <div class="chip-group" id="chip-r-shift">
+              <span class="chip" data-val="A" onclick="selectChipReport('chip-r-shift',this)">A</span>
+              <span class="chip" data-val="B" onclick="selectChipReport('chip-r-shift',this)">B</span>
+              <span class="chip" data-val="C" onclick="selectChipReport('chip-r-shift',this)">C</span>
+              <span class="chip" data-val="D" onclick="selectChipReport('chip-r-shift',this)">D</span>
             </div>
-            <div class="field-row">
-              <div class="field">
-                <label>Supervisor</label>
-                <div class="field-readonly" id="supervisor-display">
-                  <div class="avatar" id="supervisor-avatar"></div>
-                  <span id="supervisor-name">Loading...</span>
-                </div>
-              </div>
-              <div class="field">
-                <label>Line / Work Area <span class="req">*</span></label>
-                <select id="f-line">
-                  <option value="">Select line</option>
-                  <option>Line 5</option><option>Line 7</option><option>PFS2</option><option>PFS3</option>
-                </select>
-              </div>
+          </div>
+          <div class="field">
+            <label>Line / Work Area <span class="req">*</span></label>
+            <div class="chip-group" id="chip-r-line">
+              <span class="chip" data-val="Line 5" onclick="selectChipReport('chip-r-line',this)">Line 5</span>
+              <span class="chip" data-val="Line 7" onclick="selectChipReport('chip-r-line',this)">Line 7</span>
+              <span class="chip" data-val="PFS2" onclick="selectChipReport('chip-r-line',this)">PFS2</span>
+              <span class="chip" data-val="PFS3" onclick="selectChipReport('chip-r-line',this)">PFS3</span>
             </div>
-            <div class="field">
-              <label>Employee(s) Involved <span class="req">*</span></label>
-              <div class="people-picker" id="employees-picker">
-                <div class="people-picker-input-wrap" id="employees-wrap" onclick="focusEmployeeInput()">
-                  <input class="people-picker-input" id="employees-input" type="text" placeholder="Search by name..." oninput="searchPeople(this.value)" onkeydown="handlePickerKey(event)" autocomplete="off">
-                </div>
-                <div class="people-dropdown" id="employees-dropdown"></div>
-              </div>
-            </div>
-            <div class="field">
-              <label>Description of error / delay <span class="req">*</span></label>
-              <textarea id="f-description" placeholder="What happened? What was the impact on production?"></textarea>
-            </div>
-            <div class="field-row">
-              <div class="field">
-                <label>Production delay duration</label>
-                <input type="text" id="f-delay" placeholder="e.g. 45 minutes, 2 hours">
-              </div>
-              <div class="field">
-                <label>Detected by</label>
-                <select id="f-detected">
-                  <option value="">Select...</option>
-                  <option>Employee themselves</option>
-                  <option>Supervisor</option>
-                  <option>Quality check</option>
-                  <option>Downstream process</option>
-                  <option>End customer</option>
-                  <option>Support Function</option>
-                  <option>Management</option>
-                </select>
-              </div>
-            </div>
-            <div class="field">
-              <label>Has this type of error occurred before on this line?</label>
-              <div class="chip-group" id="chip-recurrence">
-                <span class="chip" data-val="yes" onclick="selectChip('chip-recurrence',this)">Yes</span>
-                <span class="chip" data-val="no" onclick="selectChip('chip-recurrence',this)">No</span>
-                <span class="chip" data-val="unknown" onclick="selectChip('chip-recurrence',this)">Unknown</span>
-              </div>
+          </div>
+          <div class="field">
+            <label>Assign to Supervisor <span class="req">*</span></label>
+            <input type="text" id="r-supervisor" placeholder="Supervisor name">
+          </div>
+          <div class="field">
+            <label>Employee(s) Involved</label>
+            <input type="text" id="r-employees" placeholder="Names or badge numbers (comma-separated)">
+          </div>
+          <div class="field">
+            <label>Short description of delay <span class="req">*</span></label>
+            <textarea id="r-description" placeholder="Briefly describe what happened..."></textarea>
+          </div>
+          <div class="field">
+            <label>Reported by</label>
+            <div class="field-readonly">
+              <div class="avatar" id="reporter-avatar"></div>
+              <span id="reporter-name">Loading...</span>
             </div>
           </div>
         </div>
-        <div class="btn-row"><button class="btn primary" onclick="goStep(2)">Continue →</button></div>
       </div>
-
-      <!-- STEP 2 -->
-      <div class="form-step" id="step2">
-        <div class="form-card">
-          <div class="form-card-header">Root cause investigation</div>
-          <div class="form-card-body">
-            <div class="field">
-              <label>Primary root cause <span class="req">*</span></label>
-              <div class="chip-group" id="chip-rootcause">
-                <span class="chip" data-val="understand" onclick="selectChip('chip-rootcause',this);showBranch()">Employee(s) didn't understand</span>
-                <span class="chip" data-val="careless" onclick="selectChip('chip-rootcause',this);showBranch()">Employee(s) were careless</span>
-                <span class="chip" data-val="noprocess" onclick="selectChip('chip-rootcause',this);showBranch()">No process / SOP exists</span>
-              </div>
-            </div>
-
-            <div class="branch-box" id="branch-understand">
-              <div class="branch-label">Employee understanding — follow-up</div>
-              <div class="field">
-                <label>Was the employee trained &amp; qualified for this task?</label>
-                <div class="chip-group" id="chip-trained">
-                  <span class="chip" data-val="yes" onclick="selectChip('chip-trained',this);showDisqBranch()">Yes, trained &amp; qualified</span>
-                  <span class="chip" data-val="no" onclick="selectChip('chip-trained',this);showDisqBranch()">No, not yet trained</span>
-                </div>
-              </div>
-              <div class="branch-box" id="branch-disqualify" style="background:#fff3ed;border-color:#e0c4b4">
-                <div class="branch-label" style="color:#6b3018">Disqualification assessment</div>
-                <div class="field">
-                  <label>Does this meet criteria for disqualification per SOP?</label>
-                  <div class="chip-group" id="chip-disqualify">
-                    <span class="chip" data-val="yes" onclick="selectChip('chip-disqualify',this)">Yes — disqualify per SOP</span>
-                    <span class="chip" data-val="no" onclick="selectChip('chip-disqualify',this)">No — training gap only</span>
-                  </div>
-                </div>
-                <div class="field" style="margin-bottom:0">
-                  <label>SOP reference number</label>
-                  <input type="text" id="f-sop" placeholder="e.g. SOP1234">
-                </div>
-              </div>
-            </div>
-
-            <div class="branch-box" id="branch-careless">
-              <div class="branch-label">Careless error — follow-up</div>
-              <div class="field" style="margin-bottom:0">
-                <label>First occurrence for this employee?</label>
-                <div class="chip-group" id="chip-firstocc">
-                  <span class="chip" data-val="yes" onclick="selectChip('chip-firstocc',this)">Yes, first time</span>
-                  <span class="chip" data-val="no" onclick="selectChip('chip-firstocc',this)">No, repeated behavior</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="branch-box" id="branch-noprocess">
-              <div class="branch-label">No process — follow-up</div>
-              <div class="field" style="margin-bottom:0">
-                <label>Which shifts does the new process need to cover?</label>
-                <div class="chip-group" id="chip-shifts">
-                  <span class="chip" data-val="all" onclick="selectChip('chip-shifts',this)">All shifts</span>
-                  <span class="chip" data-val="affected" onclick="selectChip('chip-shifts',this)">Affected shift only</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="field" style="margin-top:1rem">
-              <label>Investigation notes</label>
-              <textarea id="f-notes" placeholder="Observations, evidence, contributing factors..."></textarea>
-            </div>
-            <div class="field">
-              <label>Immediate containment action taken</label>
-              <textarea id="f-containment" placeholder="What was done immediately to prevent further impact?" style="min-height:56px"></textarea>
-            </div>
-          </div>
-        </div>
-        <div class="btn-row">
-          <button class="btn" onclick="goStep(1)">← Back</button>
-          <button class="btn primary" onclick="goStep(3)">Continue →</button>
-        </div>
-      </div>
-
-      <!-- STEP 3 -->
-      <div class="form-step" id="step3">
-        <div class="form-card">
-          <div class="form-card-header">Incident-specific questions</div>
-          <div class="form-card-body">
-            <p style="font-size:13px;color:var(--text-muted);margin-bottom:1rem">Add any additional questions and answers specific to this incident. These will appear in the final report.</p>
-            <div id="extra-questions"></div>
-            <button class="btn add" onclick="addExtraQuestion()">+ Add question</button>
-          </div>
-        </div>
-        <div class="btn-row">
-          <button class="btn" onclick="goStep(2)">← Back</button>
-          <button class="btn primary" onclick="goStep(4)">Review →</button>
-        </div>
-      </div>
-
-      <!-- STEP 4 -->
-      <div class="form-step" id="step4">
-        <div class="output-wrap" id="review-summary"></div>
-        <div class="output-wrap">
-          <h3>Investigation Flowchart</h3>
-          <div class="flow-container" id="flowchart-area"></div>
-          <div style="margin-top:.75rem">
-            <div style="font-size:11px;color:var(--text-faint);font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem">Determined corrective actions</div>
-            <div class="action-pills" id="action-pills"></div>
-          </div>
-        </div>
-        <div class="btn-row">
-          <button class="btn" onclick="goStep(3)">← Back</button>
-          <button class="btn" onclick="window.print()">Print / PDF</button>
-          <button class="btn primary" id="submit-btn" onclick="submitInvestigation()">Submit to SharePoint</button>
-        </div>
+      <div class="btn-row">
+        <button class="btn" onclick="showView('dashboard')">Cancel</button>
+        <button class="btn primary" id="submit-report-btn" onclick="submitReport()">Submit Incident →</button>
       </div>
     </div>
   </div>
-</div>
 
-<!-- DETAIL MODAL -->
+</div><!-- /main-app -->
+
+<!-- ══════ INVESTIGATION MODAL ══════ -->
 <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title" id="modal-title">Investigation Detail</div>
+      <div class="modal-title-wrap">
+        <div class="modal-title" id="modal-title">Incident</div>
+        <div id="modal-status-badge"></div>
+      </div>
       <button class="modal-close" onclick="document.getElementById('modal-overlay').classList.remove('open')">✕</button>
     </div>
     <div class="modal-body" id="modal-body"></div>
@@ -537,574 +404,252 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); min-
 
 <script>
 // ══════════════════════════════════════════
-// CONFIG
+// CONFIG — update these to match your site
 // ══════════════════════════════════════════
-const CONFIG = {
-  clientId: 'bcea4409-093e-41c1-bdeb-cb41a5996389',
-  tenantId: 'b67d722d-aa8a-4777-a169-ebeb7a6a3b67',
-  siteUrl: 'https://thermofisher.sharepoint.com/sites/SouthOpsLeaders-PeopleManagement',
-  listName: 'IncidentInvestigations',
-  scopes: ['https://thermofisher.sharepoint.com/.default']
-};
-
-const GRAPH = 'https://graph.microsoft.com/v1.0';
-const SP_HOST = 'thermofisher.sharepoint.com';
-const SITE_PATH = '/sites/SouthOpsLeaders-PeopleManagement';
+const SP_SITE   = 'https://thermofisher.sharepoint.com/sites/SouthOpsLeaders-PeopleManagement';
+const LIST_NAME = 'IncidentInvestigations';
+const SP_API    = `${SP_SITE}/_api/web/lists/getbytitle('${LIST_NAME}')`;
 
 // ══════════════════════════════════════════
-// MSAL SETUP
+// STATE
 // ══════════════════════════════════════════
-const msalConfig = {
-  auth: {
-    clientId: CONFIG.clientId,
-    authority: `https://login.microsoftonline.com/${CONFIG.tenantId}`,
-    redirectUri: 'https://jatinrp.github.io/floorwatch', //redirectUri: window.location.href.split('?')[0].split('#')[0]
-  },
-  cache: { cacheLocation: 'sessionStorage', storeAuthStateInCookie: false }
-};
-
-const msalInstance = new msal.PublicClientApplication(msalConfig);
-let currentUser = null;
-let accessToken = null;
-let siteId = null;
-let listId = null;
-let incidents = [];
-let selectedEmployees = [];
-let extraQCount = 0;
-let currentStep = 1;
-let peopleSearchTimer = null;
+let incidents       = [];
+let currentUser     = { name: '', email: '', loginName: '' };
+let activeId        = null;
+let extraQCount     = 0;
+let digestValue     = '';
 
 // ══════════════════════════════════════════
-// AUTH
+// GENERAL QUESTIONS — edit labels here
+// ══════════════════════════════════════════
+const GENERAL_QUESTIONS = [
+  'Describe the sequence of events that led to the issue.',
+  'What was supposed to happen?',
+  'Why was there a disconnect between what was supposed to happen and what did happen?',
+  'Have you ever performed this task before?',
+  'Did you ask for help?'
+];
+
+// ══════════════════════════════════════════
+// INIT — get user + form digest + load data
 // ══════════════════════════════════════════
 async function init() {
+  setSplashMsg('Signing you in...');
   try {
-    await msalInstance.initialize();
-    const resp = await msalInstance.handleRedirectPromise();
-    if (resp && resp.account) {
-      msalInstance.setActiveAccount(resp.account);
-      await afterSignIn();
-    } else {
-      const accounts = msalInstance.getAllAccounts();
-      if (accounts.length > 0) {
-        msalInstance.setActiveAccount(accounts[0]);
-        await afterSignIn();
-      }
-      // else show auth screen (already visible)
-    }
-  } catch(e) {
-    console.error('Init error', e);
-  }
-}
+    // Get current user via SharePoint REST
+    const userResp = await spFetch(`${SP_SITE}/_api/web/currentuser?$select=Title,Email,LoginName`);
+    currentUser = { name: userResp.Title || 'Unknown', email: userResp.Email || '', loginName: userResp.LoginName || '' };
 
-async function signIn() {
-  try {
-    document.getElementById('auth-error').style.display = 'none';
-    await msalInstance.loginRedirect({
-      scopes: CONFIG.scopes,
-      prompt: 'select_account'
-    });
-  } catch(e) {
-    document.getElementById('auth-error').style.display = 'block';
-    console.error(e);
-  }
-}
+    // Get form digest (needed for POST/PATCH)
+    setSplashMsg('Authenticating...');
+    const digestResp = await spPost(`${SP_SITE}/_api/contextinfo`, {});
+    digestValue = digestResp.FormDigestValue || digestResp.d?.GetContextWebInformation?.FormDigestValue || '';
 
-async function getToken() {
-  const account = msalInstance.getActiveAccount();
-  if (!account) throw new Error('No active account');
-  try {
-    const result = await msalInstance.acquireTokenSilent({ scopes: CONFIG.scopes, account });
-    return result.accessToken;
-  } catch(e) {
-    const result = await msalInstance.acquireTokenPopup({ scopes: CONFIG.scopes });
-    return result.accessToken;
-  }
-}
+    setSplashMsg('Loading incidents...');
+    await loadFromSharePoint();
 
-async function afterSignIn() {
-  showLoading('Signing you in...');
-  const account = msalInstance.getActiveAccount();
-  currentUser = { name: account.name, email: account.username };
-
-  document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('header-user').textContent = currentUser.name;
-
-  // Set supervisor display
-  const initials = currentUser.name.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
-  document.getElementById('supervisor-avatar').textContent = initials;
-  document.getElementById('supervisor-name').textContent = currentUser.name;
-
-  showLoading('Connecting to SharePoint...');
-  try {
-    accessToken = await getToken();
-    await resolveSharePointIds();
-    showLoading('Loading investigations...');
-    await loadIncidents();
-    hideLoading();
+    // Show app
+    document.getElementById('splash').style.display = 'none';
     document.getElementById('main-app').style.display = 'block';
+
+    // Set user display
+    document.getElementById('header-user').textContent = currentUser.name;
+    const initials = currentUser.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+    document.getElementById('reporter-avatar').textContent = initials;
+    document.getElementById('reporter-name').textContent = currentUser.name;
+
+    // Set default datetime
+    const now = new Date(); now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    document.getElementById('r-datetime').value = now.toISOString().slice(0,16);
+
   } catch(e) {
-    showLoading('Connection failed. Check your permissions and try again.');
-    console.error(e);
+    console.error('Init failed:', e);
+    showSplashError(e.message || 'Could not connect to SharePoint. Make sure you are signed into Microsoft 365 and have access to this site.');
   }
 }
 
-// ══════════════════════════════════════════
-// SHAREPOINT IDs
-// ══════════════════════════════════════════
-async function resolveSharePointIds() {
-  accessToken = await getToken();
-  // Get site ID
-  const siteResp = await spFetch(`${GRAPH}/sites/${SP_HOST}:${SITE_PATH}`);
-  siteId = siteResp.id;
-  // Get list ID
-  const listsResp = await spFetch(`${GRAPH}/sites/${siteId}/lists?$filter=displayName eq '${CONFIG.listName}'`);
-  if (!listsResp.value || listsResp.value.length === 0) {
-    throw new Error(`List "${CONFIG.listName}" not found. Please create it in SharePoint first.`);
-  }
-  listId = listsResp.value[0].id;
+function setSplashMsg(msg) { document.getElementById('splash-msg').textContent = msg; }
+function showSplashError(msg) {
+  document.getElementById('splash-spinner').style.display = 'none';
+  document.getElementById('splash-msg').style.display = 'none';
+  const el = document.getElementById('splash-error');
+  el.textContent = '⚠ ' + msg;
+  el.style.display = 'block';
 }
 
-async function spFetch(url, options = {}) {
-  accessToken = await getToken();
+// ══════════════════════════════════════════
+// SHAREPOINT FETCH HELPERS
+// ══════════════════════════════════════════
+async function spFetch(url) {
   const res = await fetch(url, {
-    ...options,
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      ...(options.headers || {})
-    }
+    credentials: 'include',
+    headers: { 'Accept': 'application/json;odata=nometadata', 'Content-Type': 'application/json' }
   });
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`SharePoint error ${res.status}: ${err}`);
-  }
-  if (res.status === 204) return {};
+  if (!res.ok) throw new Error(`SharePoint error ${res.status}: ${await res.text()}`);
   return res.json();
 }
 
+async function spPost(url, body) {
+  const res = await fetch(url, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Accept': 'application/json;odata=nometadata',
+      'Content-Type': 'application/json',
+      'X-RequestDigest': digestValue
+    },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error(`SharePoint POST error ${res.status}: ${await res.text()}`);
+  const text = await res.text();
+  return text ? JSON.parse(text) : {};
+}
+
+async function spPatch(url, body) {
+  const res = await fetch(url, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Accept': 'application/json;odata=nometadata',
+      'Content-Type': 'application/json',
+      'X-RequestDigest': digestValue,
+      'X-HTTP-Method': 'MERGE',
+      'IF-MATCH': '*'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error(`SharePoint PATCH error ${res.status}: ${await res.text()}`);
+}
+
+// Refresh digest every 25 minutes to prevent expiry
+async function refreshDigest() {
+  try {
+    const r = await spPost(`${SP_SITE}/_api/contextinfo`, {});
+    digestValue = r.FormDigestValue || r.d?.GetContextWebInformation?.FormDigestValue || digestValue;
+  } catch(e) { console.warn('Digest refresh failed', e); }
+}
+setInterval(refreshDigest, 25 * 60 * 1000);
+
 // ══════════════════════════════════════════
-// LOAD / SAVE
+// LOAD FROM SHAREPOINT
 // ══════════════════════════════════════════
-async function loadIncidents() {
-  const url = `${GRAPH}/sites/${siteId}/lists/${listId}/items?$expand=fields&$top=500&$orderby=fields/Created desc`;
+async function loadFromSharePoint() {
+  const url = `${SP_API}/items?$select=Id,Title,IncidentDatetime,Shift,LineArea,SupervisorName,Employees,Description,DelayDuration,DetectedBy,Recurrence,RootCause,Trained,Disqualify,SopReference,Containment,Notes,ExtraQuestions,Actions,GeneralQuestions,Status,Reporter,Created&$orderby=Created desc&$top=500`;
   const data = await spFetch(url);
   incidents = (data.value || []).map(item => ({
-    id: item.fields.Title || item.id,
-    spId: item.id,
-    datetime: item.fields.IncidentDatetime,
-    shift: item.fields.Shift,
-    supervisor: item.fields.SupervisorName,
-    line: item.fields.LineArea,
-    employees: item.fields.Employees,
-    description: item.fields.Description,
-    delay: item.fields.DelayDuration,
-    detected: item.fields.DetectedBy,
-    recurrence: item.fields.Recurrence,
-    rootcause: item.fields.RootCause,
-    trained: item.fields.Trained,
-    disqualify: item.fields.Disqualify,
-    sop: item.fields.SopReference,
-    containment: item.fields.Containment,
-    notes: item.fields.Notes,
-    extraQuestions: safeJson(item.fields.ExtraQuestions),
-    actions: safeJson(item.fields.Actions),
-    created: item.fields.Created
+    id:         item.Title || String(item.Id),
+    spId:       item.Id,
+    status:     (item.Status || 'open').toLowerCase().replace(' ',''),
+    datetime:   item.IncidentDatetime || '',
+    shift:      item.Shift || '',
+    line:       item.LineArea || '',
+    supervisor: item.SupervisorName || '',
+    employees:  item.Employees || '',
+    description:item.Description || '',
+    reporter:   item.Reporter || '',
+    delay:      item.DelayDuration || '',
+    detected:   item.DetectedBy || '',
+    recurrence: item.Recurrence || '',
+    rootcause:  item.RootCause || '',
+    trained:    item.Trained || '',
+    disqualify: item.Disqualify || '',
+    sop:        item.SopReference || '',
+    containment:item.Containment || '',
+    notes:      item.Notes || '',
+    generalQuestions: safeJson(item.GeneralQuestions),
+    extraQuestions:   safeJson(item.ExtraQuestions),
+    actions:          safeJson(item.Actions),
+    firstOccurrence:  '',
+    shiftsAffected:   '',
+    created:    item.Created || ''
   }));
   renderDashboard();
 }
 
-function safeJson(str) {
-  if (!str) return [];
-  try { return JSON.parse(str); } catch(e) { return []; }
-}
+function safeJson(str) { if(!str) return []; try { return JSON.parse(str); } catch(e) { return []; } }
 
-async function saveToSharePoint(record) {
-  // Generate ID
-  const padded = String(incidents.length + 1).padStart(4, '0');
-  const incidentId = `INC-${padded}`;
-
+// ══════════════════════════════════════════
+// SAVE TO SHAREPOINT
+// ══════════════════════════════════════════
+async function saveNewIncident(record) {
+  const incId = 'INC-' + String(Date.now()).slice(-6);
   const fields = {
-    Title: incidentId,
-    IncidentDatetime: record.datetime || null,
-    Shift: record.shift,
-    SupervisorName: record.supervisor,
-    LineArea: record.line,
-    Employees: record.employees,
-    Description: record.description,
-    DelayDuration: record.delay,
-    DetectedBy: record.detected,
-    Recurrence: record.recurrence,
-    RootCause: record.rootcause,
-    Trained: record.trained || '',
-    Disqualify: record.disqualify || '',
-    SopReference: record.sop || '',
-    Containment: record.containment || '',
-    Notes: record.notes || '',
-    ExtraQuestions: JSON.stringify(record.extraQuestions || []),
-    Actions: JSON.stringify(record.actions || [])
+    Title:           incId,
+    IncidentDatetime:record.datetime || null,
+    Shift:           record.shift,
+    LineArea:        record.line,
+    SupervisorName:  record.supervisor,
+    Employees:       record.employees,
+    Description:     record.description,
+    Reporter:        record.reporter,
+    Status:          'open',
+    DelayDuration:'',DetectedBy:'',Recurrence:'',RootCause:'',
+    Trained:'',Disqualify:'',SopReference:'',Containment:'',Notes:'',
+    GeneralQuestions:'[]',ExtraQuestions:'[]',Actions:'[]'
   };
+  const result = await spPost(`${SP_API}/items`, fields);
+  return { incId, spId: result.Id || result.id };
+}
 
-  await spFetch(`${GRAPH}/sites/${siteId}/lists/${listId}/items`, {
-    method: 'POST',
-    body: JSON.stringify({ fields })
-  });
-
-  return incidentId;
+async function updateIncident(spId, fields) {
+  await spPatch(`${SP_API}/items(${spId})`, fields);
 }
 
 // ══════════════════════════════════════════
-// PEOPLE SEARCH
+// VIEWS
 // ══════════════════════════════════════════
-function focusEmployeeInput() {
-  document.getElementById('employees-input').focus();
-}
-
-function searchPeople(query) {
-  clearTimeout(peopleSearchTimer);
-  const dropdown = document.getElementById('employees-dropdown');
-  if (!query || query.length < 2) { dropdown.classList.remove('open'); return; }
-  dropdown.innerHTML = '<div class="people-searching">Searching...</div>';
-  dropdown.classList.add('open');
-  peopleSearchTimer = setTimeout(() => doSearchPeople(query), 350);
-}
-
-async function doSearchPeople(query) {
-  const dropdown = document.getElementById('employees-dropdown');
-  try {
-    accessToken = await getToken();
-    const graphScopes = ['https://graph.microsoft.com/User.ReadBasic.All'];
-    let userToken;
-    try {
-      const r = await msalInstance.acquireTokenSilent({ scopes: graphScopes, account: msalInstance.getActiveAccount() });
-      userToken = r.accessToken;
-    } catch(e) {
-      const r = await msalInstance.acquireTokenPopup({ scopes: graphScopes });
-      userToken = r.accessToken;
-    }
-
-    const res = await fetch(`${GRAPH}/users?$filter=startswith(displayName,'${encodeURIComponent(query)}') or startswith(mail,'${encodeURIComponent(query)}')&$select=id,displayName,mail&$top=8`, {
-      headers: { 'Authorization': `Bearer ${userToken}`, 'Accept': 'application/json' }
-    });
-    const data = await res.json();
-    const users = (data.value || []).filter(u => !selectedEmployees.find(e => e.id === u.id));
-
-    if (users.length === 0) {
-      dropdown.innerHTML = '<div class="people-searching">No results found</div>';
-      return;
-    }
-
-    dropdown.innerHTML = users.map(u => `
-      <div class="people-option" onclick="addEmployee(${JSON.stringify(u).replace(/"/g,'&quot;')})">
-        <div class="poav">${initials(u.displayName)}</div>
-        <div><div class="po-name">${u.displayName}</div><div class="po-email">${u.mail || ''}</div></div>
-      </div>`).join('');
-    dropdown.classList.add('open');
-  } catch(e) {
-    dropdown.innerHTML = '<div class="people-searching">Search unavailable</div>';
-  }
-}
-
-function addEmployee(user) {
-  if (selectedEmployees.find(e => e.id === user.id)) return;
-  selectedEmployees.push(user);
-  renderEmployeeTags();
-  document.getElementById('employees-input').value = '';
-  document.getElementById('employees-dropdown').classList.remove('open');
-}
-
-function removeEmployee(id) {
-  selectedEmployees = selectedEmployees.filter(e => e.id !== id);
-  renderEmployeeTags();
-}
-
-function renderEmployeeTags() {
-  const wrap = document.getElementById('employees-wrap');
-  const input = document.getElementById('employees-input');
-  wrap.querySelectorAll('.person-tag').forEach(t => t.remove());
-  selectedEmployees.forEach(e => {
-    const tag = document.createElement('span');
-    tag.className = 'person-tag';
-    tag.innerHTML = `<span class="ptav">${initials(e.displayName)}</span>${e.displayName}<span class="pt-remove" onclick="removeEmployee('${e.id}')">×</span>`;
-    wrap.insertBefore(tag, input);
-  });
-}
-
-function handlePickerKey(e) {
-  if (e.key === 'Escape') document.getElementById('employees-dropdown').classList.remove('open');
-}
-
-document.addEventListener('click', e => {
-  if (!document.getElementById('employees-picker').contains(e.target)) {
-    document.getElementById('employees-dropdown').classList.remove('open');
-  }
-});
-
-function initials(name) {
-  return (name || '').split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
+function showView(v) {
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el=>el.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  document.getElementById('nav-'+v).classList.add('active');
+  if(v==='dashboard') renderDashboard();
+  if(v==='report') resetReportForm();
 }
 
 // ══════════════════════════════════════════
-// FORM LOGIC
+// REPORT FORM
 // ══════════════════════════════════════════
-function selectChip(groupId, el) {
-  document.querySelectorAll('#' + groupId + ' .chip').forEach(c => c.classList.remove('selected'));
+function selectChipReport(groupId, el) {
+  document.querySelectorAll('#'+groupId+' .chip').forEach(c=>c.classList.remove('selected'));
   el.classList.add('selected');
 }
+function getReportChip(groupId) { const s=document.querySelector('#'+groupId+' .chip.selected'); return s?s.dataset.val:''; }
+function rv(id) { return document.getElementById(id)?.value?.trim()||''; }
 
-function getChipVal(groupId) {
-  const sel = document.querySelector('#' + groupId + ' .chip.selected');
-  return sel ? sel.dataset.val : '';
+function resetReportForm() {
+  document.querySelectorAll('#chip-r-shift .chip,#chip-r-line .chip').forEach(c=>c.classList.remove('selected'));
+  ['r-supervisor','r-employees','r-description'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  const now=new Date(); now.setMinutes(now.getMinutes()-now.getTimezoneOffset());
+  document.getElementById('r-datetime').value = now.toISOString().slice(0,16);
 }
 
-function showBranch() {
-  ['branch-understand','branch-careless','branch-noprocess'].forEach(id =>
-    document.getElementById(id).classList.remove('visible'));
-  const rc = getChipVal('chip-rootcause');
-  const map = { understand:'branch-understand', careless:'branch-careless', noprocess:'branch-noprocess' };
-  if (rc && map[rc]) document.getElementById(map[rc]).classList.add('visible');
-}
+async function submitReport() {
+  const shift=getReportChip('chip-r-shift'), line=getReportChip('chip-r-line');
+  if(!rv('r-datetime')){showToast('Please enter date and time.',true);return}
+  if(!shift){showToast('Please select a shift.',true);return}
+  if(!line){showToast('Please select a line.',true);return}
+  if(!rv('r-supervisor')){showToast('Please assign a supervisor.',true);return}
+  if(!rv('r-description')){showToast('Please enter a description.',true);return}
 
-function showDisqBranch() {
-  const trained = getChipVal('chip-trained');
-  document.getElementById('branch-disqualify').classList.toggle('visible', trained === 'yes');
-}
-
-function goStep(n) {
-  if (n > currentStep && !validateStep(currentStep)) return;
-  document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
-  document.getElementById('step' + n).classList.add('active');
-  document.querySelectorAll('.prog-step').forEach((p, i) => {
-    p.classList.remove('active','done');
-    if (i + 1 < n) p.classList.add('done');
-    else if (i + 1 === n) p.classList.add('active');
-  });
-  currentStep = n;
-  if (n === 4) buildReview();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function validateStep(n) {
-  if (n === 1) {
-    if (!document.getElementById('f-datetime').value) { showToast('Please enter the date and time.', true); return false; }
-    if (!document.getElementById('f-shift').value) { showToast('Please select a shift.', true); return false; }
-    if (!document.getElementById('f-line').value) { showToast('Please select a line / work area.', true); return false; }
-    if (selectedEmployees.length === 0) { showToast('Please select at least one employee.', true); return false; }
-    if (!document.getElementById('f-description').value.trim()) { showToast('Please enter a description.', true); return false; }
-  }
-  if (n === 2 && !getChipVal('chip-rootcause')) { showToast('Please select a root cause.', true); return false; }
-  return true;
-}
-
-function addExtraQuestion() {
-  extraQCount++;
-  const id = 'eq' + extraQCount;
-  const wrap = document.createElement('div');
-  wrap.className = 'extra-q';
-  wrap.id = 'wrap-' + id;
-  wrap.innerHTML = `<div class="extra-q-row">
-    <input type="text" id="${id}-q" placeholder="Question...">
-    <textarea id="${id}-a" placeholder="Answer..."></textarea>
-    <button class="extra-q-remove" onclick="document.getElementById('wrap-${id}').remove()">✕</button>
-  </div>`;
-  document.getElementById('extra-questions').appendChild(wrap);
-}
-
-function getExtraQuestions() {
-  return [...document.querySelectorAll('.extra-q')].map(wrap => {
-    const qEl = wrap.querySelector('[id$="-q"]');
-    const aEl = wrap.querySelector('[id$="-a"]');
-    return qEl && qEl.value.trim() ? { q: qEl.value.trim(), a: aEl?.value.trim() || '' } : null;
-  }).filter(Boolean);
-}
-
-function getActions() {
-  const rc = getChipVal('chip-rootcause');
-  const trained = getChipVal('chip-trained');
-  const disq = getChipVal('chip-disqualify');
-  if (rc === 'careless') return ['Coach / counsel employee'];
-  if (rc === 'noprocess') return ['Establish process and SOP', 'Train all affected shifts'];
-  if (rc === 'understand') {
-    if (trained === 'no') return ['Coach / counsel supervisor', 'Train and qualify employee'];
-    if (trained === 'yes') {
-      if (disq === 'yes') return ['Requalify employee', 'Track through training governance'];
-      if (disq === 'no') return ['Improve existing training'];
-    }
-    return ['Determine training status'];
-  }
-  return ['Further investigation required'];
-}
-
-const RC_LABELS = { careless: 'Employee(s) were careless', understand: "Employee(s) didn't understand", noprocess: 'No process / SOP exists' };
-
-function buildReview() {
-  const rc = getChipVal('chip-rootcause');
-  const empNames = selectedEmployees.map(e => e.displayName).join(', ');
-  const dt = document.getElementById('f-datetime').value;
-
-  document.getElementById('review-summary').innerHTML = `
-    <h3>Investigation Summary</h3>
-    <div class="summary-grid" style="margin-top:.75rem">
-      <div class="summary-item"><span class="sl">Supervisor</span><span class="sv">${currentUser.name}</span></div>
-      <div class="summary-item"><span class="sl">Date / Time</span><span class="sv">${dt.replace('T',' ')}</span></div>
-      <div class="summary-item"><span class="sl">Shift</span><span class="sv">${v('f-shift') || '—'}</span></div>
-      <div class="summary-item"><span class="sl">Line / Area</span><span class="sv">${v('f-line') || '—'}</span></div>
-      <div class="summary-item"><span class="sl">Employee(s)</span><span class="sv">${empNames || '—'}</span></div>
-      <div class="summary-item"><span class="sl">Delay duration</span><span class="sv">${v('f-delay') || '—'}</span></div>
-      <div class="summary-item"><span class="sl">Detected by</span><span class="sv">${v('f-detected') || '—'}</span></div>
-      <div class="summary-item"><span class="sl">Root cause</span><span class="sv">${RC_LABELS[rc] || '—'}</span></div>
-      <div class="summary-item" style="grid-column:1/-1"><span class="sl">Description</span><span class="sv">${v('f-description')}</span></div>
-      ${v('f-notes') ? `<div class="summary-item" style="grid-column:1/-1"><span class="sl">Notes</span><span class="sv">${v('f-notes')}</span></div>` : ''}
-    </div>`;
-
-  drawFlowchart(rc, getChipVal('chip-trained'), getChipVal('chip-disqualify'));
-  const actions = getActions();
-  document.getElementById('action-pills').innerHTML = actions.map(a => `<span class="action-pill">→ ${a}</span>`).join('');
-}
-
-function v(id) { const el = document.getElementById(id); return el ? el.value : ''; }
-
-// ══════════════════════════════════════════
-// FLOWCHART
-// ══════════════════════════════════════════
-function drawFlowchart(rc, trained, disq) {
-  const container = document.getElementById('flowchart-area');
-  const NS = 'http://www.w3.org/2000/svg';
-  const W = 580;
-  let H = rc === 'noprocess' ? 400 : rc === 'understand' && trained === 'yes' ? 480 : 340;
-
-  const boxFill='#f7f6f2', boxStroke='#c8c4bc', diamondFill='#eef3f8', diamondStroke='#8aabcc';
-  const actionFill='#e8f0eb', actionStroke='#7db89a', textMain='#1a1916', textMuted='#6b6860', arrowCol='#9c9890';
-
-  function el(tag, attrs) {
-    const e = document.createElementNS(NS, tag);
-    for (const [k,vl] of Object.entries(attrs)) e.setAttribute(k, vl);
-    return e;
-  }
-  function box(svg, x, y, w, h, label, fill, stroke) {
-    const g = document.createElementNS(NS,'g');
-    g.appendChild(el('rect',{x,y,width:w,height:h,rx:6,fill:fill||boxFill,stroke:stroke||boxStroke,'stroke-width':'1'}));
-    const t = el('text',{x:x+w/2,y:y+h/2,'text-anchor':'middle','dominant-baseline':'central','font-size':'11','font-weight':'500',fill:textMain,'font-family':'IBM Plex Sans, sans-serif'});
-    t.textContent=label; g.appendChild(t); svg.appendChild(g);
-    return {cx:x+w/2,cy:y+h/2,top:y,bottom:y+h,left:x,right:x+w};
-  }
-  function diamond(svg, x, y, w, h, lines) {
-    const g=document.createElementNS(NS,'g'), cx=x+w/2, cy=y+h/2;
-    g.appendChild(el('polygon',{points:`${cx},${y} ${x+w},${cy} ${cx},${y+h} ${x},${cy}`,fill:diamondFill,stroke:diamondStroke,'stroke-width':'1'}));
-    lines.forEach((line,i)=>{
-      const t=el('text',{x:cx,y:cy+(i-(lines.length-1)/2)*13,'text-anchor':'middle','dominant-baseline':'central','font-size':'10','font-weight':'500',fill:textMain,'font-family':'IBM Plex Sans, sans-serif'});
-      t.textContent=line; g.appendChild(t);
-    });
-    svg.appendChild(g);
-    return {cx,cy,top:y,bottom:y+h,left:x,right:x+w};
-  }
-  function arr(svg, x1,y1,x2,y2,label,lx,ly) {
-    svg.appendChild(el('line',{x1,y1,x2,y2,stroke:arrowCol,'stroke-width':'1','marker-end':'url(#fw-arr)'}));
-    if(label){const t=el('text',{x:lx||(x1+x2)/2+4,y:ly||(y1+y2)/2-4,'font-size':'9',fill:textMuted,'font-family':'IBM Plex Mono, monospace'});t.textContent=label;svg.appendChild(t);}
-  }
-  function pth(svg,d){svg.appendChild(el('path',{d,fill:'none',stroke:arrowCol,'stroke-width':'1','marker-end':'url(#fw-arr)'}));}
-  function lbl(svg,x,y,txt){const t=el('text',{x,y,'font-size':'9',fill:textMuted,'font-family':'IBM Plex Mono, monospace'});t.textContent=txt;svg.appendChild(t);}
-
-  const svg = el('svg',{width:'100%',viewBox:`0 0 ${W} ${H}`,xmlns:NS});
-  const defs = document.createElementNS(NS,'defs');
-  defs.innerHTML=`<marker id="fw-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="${arrowCol}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>`;
-  svg.appendChild(defs);
-  svg.appendChild(el('rect',{width:W,height:H,fill:'#ffffff'}));
-
-  box(svg,190,14,200,36,'Error causing delay','#e8ecf5','#8899cc');
-  arr(svg,290,50,290,78);
-  box(svg,190,78,200,36,'Investigate same/next shift');
-  arr(svg,290,114,290,146);
-  diamond(svg,218,146,144,48,['Root','cause?']);
-
-  if(!rc){container.innerHTML='';container.appendChild(svg);return;}
-
-  if(rc==='careless'){
-    arr(svg,362,170,410,170);
-    box(svg,410,152,140,36,'Careless / attitude','#fff4ee','#d9a080');
-    arr(svg,480,188,480,240);
-    box(svg,410,240,140,38,'Coach / counsel employee',actionFill,actionStroke);
-  }
-  if(rc==='noprocess'){
-    arr(svg,290,194,290,240);
-    box(svg,190,240,200,36,'No process exists','#fff8e6','#c8a840');
-    arr(svg,290,276,290,316);
-    box(svg,190,316,200,36,'Establish process + SOP',actionFill,actionStroke);
-    arr(svg,290,352,290,388);
-    box(svg,190,388,200,36,'Train all shifts',actionFill,actionStroke);
-  }
-  if(rc==='understand'){
-    arr(svg,218,170,160,170);
-    box(svg,36,152,124,36,"Didn't understand",'#eef4fb','#88aacc');
-    arr(svg,98,188,98,230);
-    diamond(svg,44,230,108,42,['Trained?']);
-    if(!trained){container.innerHTML='';container.appendChild(svg);return;}
-    if(trained==='no'){
-      pth(svg,'M44,251 L16,251 L16,308 L32,308'); lbl(svg,4,262,'No');
-      box(svg,32,290,132,36,'Coach supervisor',actionFill,actionStroke);
-      arr(svg,164,308,192,308);
-      box(svg,192,290,160,36,'Train employee',actionFill,actionStroke);
-    }
-    if(trained==='yes'){
-      arr(svg,98,272,98,316); lbl(svg,102,296,'Yes');
-      diamond(svg,44,316,108,44,['Disqualify','per SOP?']);
-      if(!disq){container.innerHTML='';container.appendChild(svg);return;}
-      if(disq==='yes'){
-        arr(svg,98,360,98,400); lbl(svg,102,382,'Yes');
-        box(svg,24,400,148,36,'Requalify + track governance',actionFill,actionStroke);
-      } else {
-        pth(svg,'M44,338 L16,338 L16,402 L32,402'); lbl(svg,4,352,'No');
-        box(svg,32,384,132,36,'Improve training',actionFill,actionStroke);
-      }
-    }
-  }
-  container.innerHTML=''; container.appendChild(svg);
-}
-
-// ══════════════════════════════════════════
-// SUBMIT
-// ══════════════════════════════════════════
-async function submitInvestigation() {
-  const rc = getChipVal('chip-rootcause');
-  if (!rc) { showToast('Please complete the root cause section.', true); return; }
-
-  const btn = document.getElementById('submit-btn');
-  btn.disabled = true;
-  btn.textContent = 'Saving...';
-
-  const record = {
-    datetime: v('f-datetime'),
-    shift: v('f-shift'),
-    supervisor: currentUser.name,
-    line: v('f-line'),
-    employees: selectedEmployees.map(e => e.displayName).join('; '),
-    description: v('f-description'),
-    delay: v('f-delay'),
-    detected: v('f-detected'),
-    recurrence: getChipVal('chip-recurrence'),
-    rootcause: rc,
-    trained: getChipVal('chip-trained'),
-    disqualify: getChipVal('chip-disqualify'),
-    sop: v('f-sop'),
-    containment: v('f-containment'),
-    notes: v('f-notes'),
-    extraQuestions: getExtraQuestions(),
-    actions: getActions()
-  };
+  const btn=document.getElementById('submit-report-btn');
+  btn.disabled=true; btn.textContent='Submitting...';
 
   try {
-    const id = await saveToSharePoint(record);
-    showToast(`Investigation ${id} saved to SharePoint.`);
-    btn.disabled = false;
-    btn.textContent = 'Submit to SharePoint';
+    const record = {
+      datetime: rv('r-datetime'), shift, line,
+      supervisor: rv('r-supervisor'), employees: rv('r-employees'),
+      description: rv('r-description'), reporter: currentUser.name
+    };
+    const { incId, spId } = await saveNewIncident(record);
+    showToast(`${incId} reported and assigned to ${record.supervisor}.`, false, true);
+    await loadFromSharePoint();
     showView('dashboard');
-    await loadIncidents();
   } catch(e) {
-    console.error(e);
     showToast('Save failed: ' + e.message, true);
-    btn.disabled = false;
-    btn.textContent = 'Submit to SharePoint';
+    console.error(e);
+  } finally {
+    btn.disabled=false; btn.textContent='Submit Incident →';
   }
 }
 
@@ -1112,145 +657,449 @@ async function submitInvestigation() {
 // DASHBOARD
 // ══════════════════════════════════════════
 function renderDashboard() {
-  const now = new Date();
-  const thisMonth = incidents.filter(i => {
-    const d = new Date(i.created || i.datetime);
-    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-  });
   document.getElementById('stat-total').textContent = incidents.length;
-  document.getElementById('stat-month').textContent = thisMonth.length;
-  document.getElementById('stat-careless').textContent = incidents.filter(i => i.rootcause === 'careless').length;
-  document.getElementById('stat-training').textContent = incidents.filter(i => i.rootcause === 'understand').length;
+  document.getElementById('stat-open').textContent = incidents.filter(i=>i.status==='open').length;
+  document.getElementById('stat-inprogress').textContent = incidents.filter(i=>i.status==='inprogress').length;
+  document.getElementById('stat-closed').textContent = incidents.filter(i=>i.status==='closed').length;
+  renderCharts();
   renderTable();
 }
 
-function renderTable() {
-  const search = document.getElementById('filter-search').value.toLowerCase();
-  const rcFilter = document.getElementById('filter-rc').value;
-  const lineFilter = document.getElementById('filter-line').value;
+function renderCharts() {
+  const total=incidents.length;
+  const open=incidents.filter(i=>i.status==='open').length;
+  const prog=incidents.filter(i=>i.status==='inprogress').length;
+  const closed=incidents.filter(i=>i.status==='closed').length;
 
-  let data = incidents.filter(i => {
-    if (rcFilter && i.rootcause !== rcFilter) return false;
-    if (lineFilter && i.line !== lineFilter) return false;
-    if (search) {
-      const hay = [i.supervisor,i.line,i.employees,i.description,i.id].join(' ').toLowerCase();
-      if (!hay.includes(search)) return false;
-    }
+  // Donut
+  const canvas=document.getElementById('chart-donut');
+  const ctx=canvas.getContext('2d');
+  canvas.width=90; canvas.height=90;
+  ctx.clearRect(0,0,90,90);
+  if(total===0){
+    ctx.beginPath();ctx.arc(45,45,35,0,Math.PI*2);
+    ctx.strokeStyle='#e2e6eb';ctx.lineWidth=14;ctx.stroke();
+  } else {
+    const slices=[{val:open,color:'#f5a623'},{val:prog,color:'#0078f0'},{val:closed,color:'#16a34a'}];
+    let start=-Math.PI/2;
+    slices.forEach(s=>{
+      if(!s.val)return;
+      const angle=(s.val/total)*Math.PI*2;
+      ctx.beginPath();ctx.moveTo(45,45);
+      ctx.arc(45,45,40,start,start+angle);
+      ctx.closePath();ctx.fillStyle=s.color;ctx.fill();
+      start+=angle;
+    });
+    ctx.beginPath();ctx.arc(45,45,26,0,Math.PI*2);
+    ctx.fillStyle='#fff';ctx.fill();
+    ctx.fillStyle='#0f1923';ctx.font='bold 13px IBM Plex Sans,sans-serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(total,45,45);
+  }
+  document.getElementById('donut-legend').innerHTML=`
+    <div class="legend-item"><span class="legend-dot" style="background:#f5a623"></span>Open<span class="legend-val">${open}</span></div>
+    <div class="legend-item"><span class="legend-dot" style="background:#0078f0"></span>In Progress<span class="legend-val">${prog}</span></div>
+    <div class="legend-item"><span class="legend-dot" style="background:#16a34a"></span>Closed<span class="legend-val">${closed}</span></div>`;
+
+  // Root cause bars
+  const rc={understand:0,careless:0,noprocess:0,pending:0};
+  incidents.forEach(i=>{ rc[i.rootcause]=(rc[i.rootcause]||0)+1; if(!i.rootcause) rc.pending++; });
+  const rcMax=Math.max(rc.understand,rc.careless,rc.noprocess,rc.pending,1);
+  document.getElementById('chart-rc').innerHTML=[
+    {key:'careless',label:'Careless',color:'#e53935'},
+    {key:'understand',label:"Didn't understand",color:'#5c35d4'},
+    {key:'noprocess',label:'No process',color:'#d97706'},
+    {key:'pending',label:'Pending',color:'#9aa3ad'}
+  ].map(r=>`
+    <div class="bar-row">
+      <div class="bar-label">${r.label}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.max(Math.round((rc[r.key]||0)/rcMax*100),rc[r.key]?5:0)}%;background:${r.color}">
+        ${rc[r.key]?`<span class="bar-count">${rc[r.key]}</span>`:''}
+      </div></div>
+    </div>`).join('');
+
+  // By line bars
+  const lc={'Line 5':0,'Line 7':0,'PFS2':0,'PFS3':0};
+  incidents.forEach(i=>{ if(lc[i.line]!==undefined) lc[i.line]++; });
+  const lMax=Math.max(...Object.values(lc),1);
+  document.getElementById('chart-line').innerHTML=Object.entries(lc).map(([l,c])=>`
+    <div class="bar-row">
+      <div class="bar-label">${l}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.max(Math.round(c/lMax*100),c?5:0)}%;background:#0057ff">
+        ${c?`<span class="bar-count">${c}</span>`:''}
+      </div></div>
+    </div>`).join('');
+}
+
+function renderTable() {
+  const search=document.getElementById('filter-search').value.toLowerCase();
+  const statusF=document.getElementById('filter-status').value;
+  const lineF=document.getElementById('filter-line').value;
+  const rcF=document.getElementById('filter-rc').value;
+  const data=incidents.filter(i=>{
+    if(statusF&&i.status!==statusF)return false;
+    if(lineF&&i.line!==lineF)return false;
+    if(rcF&&i.rootcause!==rcF)return false;
+    if(search){const hay=[i.id,i.supervisor,i.line,i.employees,i.description,i.reporter].join(' ').toLowerCase();if(!hay.includes(search))return false}
     return true;
   });
-
-  const tbody = document.getElementById('table-body');
-  const empty = document.getElementById('empty-state');
-
-  if (data.length === 0) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
-  empty.style.display = 'none';
-
-  const shortRc = { careless:'Careless', understand:"Didn't understand", noprocess:'No process' };
-
-  tbody.innerHTML = data.map(i => `
-    <tr class="data-row" onclick="openDetail('${i.spId}')">
-      <td><span style="font-family:var(--mono);font-size:11px;color:var(--text-muted)">${i.id}</span></td>
-      <td>${i.datetime ? i.datetime.replace('T',' ').slice(0,16) : '—'}</td>
-      <td>${i.line || '—'}</td>
-      <td>${i.supervisor || '—'}</td>
-      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${i.employees || '—'}</td>
-      <td><span class="badge badge-${i.rootcause}">${shortRc[i.rootcause] || i.rootcause || '—'}</span></td>
-      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${(i.actions||[]).join(', ') || '—'}</td>
+  const tbody=document.getElementById('table-body');
+  const empty=document.getElementById('empty-state');
+  if(!data.length){tbody.innerHTML='';empty.style.display='block';return}
+  empty.style.display='none';
+  const sLabel={open:'Open',inprogress:'In Progress',closed:'Closed'};
+  const rcShort={careless:'Careless',understand:"Didn't understand",noprocess:'No process'};
+  tbody.innerHTML=data.map(i=>`
+    <tr class="data-row" onclick="openModal('${i.id}')">
+      <td><span style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--text-muted)">${i.id}</span></td>
+      <td style="white-space:nowrap;font-size:12px;color:var(--text-muted)">${fmtDate(i.datetime||i.created)}</td>
+      <td><span style="font-family:var(--mono);font-weight:700">${i.shift||'—'}</span></td>
+      <td>${i.line||'—'}</td>
+      <td>${i.supervisor||'—'}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-muted);font-size:12px">${i.description||'—'}</td>
+      <td><span class="badge badge-${i.status}">${sLabel[i.status]||i.status}</span></td>
+      <td>${i.rootcause?`<span class="badge badge-${i.rootcause}">${rcShort[i.rootcause]}</span>`:'<span style="color:var(--text-faint);font-size:12px">—</span>'}</td>
     </tr>`).join('');
 }
 
+function fmtDate(dt){return dt?dt.replace('T',' ').slice(0,16):'—'}
+
 // ══════════════════════════════════════════
-// DETAIL MODAL
+// MODAL
 // ══════════════════════════════════════════
-function openDetail(spId) {
-  const inc = incidents.find(i => i.spId === spId);
-  if (!inc) return;
-  document.getElementById('modal-title').textContent = `${inc.id} — ${inc.line || 'Unknown line'}`;
-  const rcFull={careless:'Employee(s) were careless',understand:"Employee(s) didn't understand",noprocess:'No process / SOP exists'};
-  const trainedFull={yes:'Yes, trained & qualified',no:'No, not trained'};
-  const disqFull={yes:'Yes — disqualify per SOP',no:'No — training gap only'};
-  let extraHTML = '';
-  if (inc.extraQuestions?.length > 0) {
-    extraHTML = `<div class="modal-section"><div class="modal-section-title">Incident-specific questions</div>
-      ${inc.extraQuestions.map(q=>`<div class="modal-field"><span class="mfl">${q.q}</span><span class="mfv">${q.a||'—'}</span></div>`).join('')}
-    </div>`;
-  }
-  document.getElementById('modal-body').innerHTML = `
-    <div class="modal-section">
-      <div class="modal-section-title">Incident details</div>
-      <div class="modal-field"><span class="mfl">ID</span><span class="mfv" style="font-family:var(--mono)">${inc.id}</span></div>
-      <div class="modal-field"><span class="mfl">Date / Time</span><span class="mfv">${inc.datetime?.replace('T',' ').slice(0,16)||'—'}</span></div>
-      <div class="modal-field"><span class="mfl">Shift</span><span class="mfv">${inc.shift||'—'}</span></div>
-      <div class="modal-field"><span class="mfl">Supervisor</span><span class="mfv">${inc.supervisor||'—'}</span></div>
-      <div class="modal-field"><span class="mfl">Line / Area</span><span class="mfv">${inc.line||'—'}</span></div>
-      <div class="modal-field"><span class="mfl">Employee(s)</span><span class="mfv">${inc.employees||'—'}</span></div>
-      <div class="modal-field"><span class="mfl">Delay duration</span><span class="mfv">${inc.delay||'—'}</span></div>
-      <div class="modal-field"><span class="mfl">Detected by</span><span class="mfv">${inc.detected||'—'}</span></div>
-      <div class="modal-field"><span class="mfl">Recurring?</span><span class="mfv">${inc.recurrence||'—'}</span></div>
-      <div class="modal-field"><span class="mfl">Description</span><span class="mfv">${inc.description||'—'}</span></div>
-    </div>
-    <div class="modal-section">
-      <div class="modal-section-title">Root cause & investigation</div>
-      <div class="modal-field"><span class="mfl">Root cause</span><span class="mfv">${rcFull[inc.rootcause]||inc.rootcause||'—'}</span></div>
-      ${inc.trained?`<div class="modal-field"><span class="mfl">Trained?</span><span class="mfv">${trainedFull[inc.trained]||inc.trained}</span></div>`:''}
-      ${inc.disqualify?`<div class="modal-field"><span class="mfl">Disqualify?</span><span class="mfv">${disqFull[inc.disqualify]||inc.disqualify}</span></div>`:''}
-      ${inc.sop?`<div class="modal-field"><span class="mfl">SOP reference</span><span class="mfv" style="font-family:var(--mono)">${inc.sop}</span></div>`:''}
-      ${inc.containment?`<div class="modal-field"><span class="mfl">Containment</span><span class="mfv">${inc.containment}</span></div>`:''}
-      ${inc.notes?`<div class="modal-field"><span class="mfl">Notes</span><span class="mfv">${inc.notes}</span></div>`:''}
-    </div>
-    ${extraHTML}
-    <div class="modal-section">
-      <div class="modal-section-title">Corrective actions</div>
-      <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.25rem">
-        ${(inc.actions||[]).map(a=>`<span class="action-pill">→ ${a}</span>`).join('')}
-      </div>
-    </div>`;
+function openModal(id){
+  activeId=id; extraQCount=0;
+  renderModal();
   document.getElementById('modal-overlay').classList.add('open');
+  document.getElementById('modal-overlay').scrollTop=0;
+}
+function closeModal(e){if(e.target===document.getElementById('modal-overlay'))document.getElementById('modal-overlay').classList.remove('open')}
+function getInc(){return incidents.find(i=>i.id===activeId)}
+
+function renderModal(){
+  const inc=getInc();if(!inc)return;
+  const sLabel={open:'Open',inprogress:'In Progress',closed:'Closed'};
+  document.getElementById('modal-title').textContent=`${inc.id} — ${inc.line||''}`;
+  document.getElementById('modal-status-badge').innerHTML=`<span class="badge badge-${inc.status}">${sLabel[inc.status]}</span>`;
+
+  const opts=(arr,sel)=>arr.map(o=>`<option ${sel===o?'selected':''}>${o}</option>`).join('');
+
+  // General questions with saved answers
+  const gqAnswers={};
+  (inc.generalQuestions||[]).forEach(q=>{gqAnswers[q.q]=q.a});
+  const gqHTML=GENERAL_QUESTIONS.map((lbl,i)=>`
+    <div class="field" style="margin-bottom:1rem">
+      <label>${i+1}. ${lbl}</label>
+      <textarea id="gq-${i}" style="min-height:60px" placeholder="Answer...">${esc(gqAnswers[lbl]||'')}</textarea>
+    </div>`).join('');
+
+  document.getElementById('modal-body').innerHTML=`
+    <div class="section-divider">🔘 Investigation Status</div>
+    <div class="status-stepper">
+      <div class="status-step ${inc.status==='open'?'active-open':''}" onclick="setStatus('open')"><span class="status-dot"></span>Open</div>
+      <div class="status-step ${inc.status==='inprogress'?'active-inprogress':''}" onclick="setStatus('inprogress')"><span class="status-dot"></span>In Progress</div>
+      <div class="status-step ${inc.status==='closed'?'active-closed':''}" onclick="setStatus('closed')"><span class="status-dot"></span>Closed</div>
+    </div>
+
+    <div class="section-divider">🔒 Incident Details (locked)</div>
+    <div class="locked-banner">🔒 Set when the incident was reported — read only.</div>
+    <div class="detail-grid">
+      <div class="detail-item"><span class="dl">Reported</span><span class="dv">${fmtDate(inc.datetime||inc.created)}</span></div>
+      <div class="detail-item"><span class="dl">Shift</span><span class="dv">${inc.shift||'—'}</span></div>
+      <div class="detail-item"><span class="dl">Line / Area</span><span class="dv">${inc.line||'—'}</span></div>
+      <div class="detail-item"><span class="dl">Assigned Supervisor</span><span class="dv">${inc.supervisor||'—'}</span></div>
+      <div class="detail-item"><span class="dl">Employee(s) Involved</span><span class="dv">${inc.employees||'—'}</span></div>
+      <div class="detail-item"><span class="dl">Reported by</span><span class="dv">${inc.reporter||'—'}</span></div>
+      <div class="detail-item" style="grid-column:1/-1"><span class="dl">Description</span><span class="dv">${inc.description||'—'}</span></div>
+    </div>
+
+    <div class="section-divider">📋 General Questions</div>
+    ${gqHTML}
+
+    <div class="section-divider">🔍 Supervisor Investigation</div>
+    <div class="field-row" style="margin-bottom:1rem">
+      <div class="field">
+        <label>Production delay duration</label>
+        <input type="text" id="inv-delay" value="${esc(inc.delay)}" placeholder="e.g. 45 minutes">
+      </div>
+      <div class="field">
+        <label>Detected by</label>
+        <select id="inv-detected">
+          <option value="">Select...</option>
+          ${opts(['Employee themselves','Supervisor','Quality check','Downstream process','End customer','Support Function','Management'],inc.detected)}
+        </select>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:1rem">
+      <label>Has this error occurred before on this line?</label>
+      <div class="chip-group" id="chip-recurrence">
+        <span class="chip ${inc.recurrence==='yes'?'selected':''}" data-val="yes" onclick="selectChip('chip-recurrence',this)">Yes</span>
+        <span class="chip ${inc.recurrence==='no'?'selected':''}" data-val="no" onclick="selectChip('chip-recurrence',this)">No</span>
+        <span class="chip ${inc.recurrence==='unknown'?'selected':''}" data-val="unknown" onclick="selectChip('chip-recurrence',this)">Unknown</span>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:1.25rem">
+      <label>Immediate containment action taken</label>
+      <textarea id="inv-containment" style="min-height:60px" placeholder="What was done immediately?">${esc(inc.containment)}</textarea>
+    </div>
+    <div class="field" style="margin-bottom:1rem">
+      <label>Primary root cause</label>
+      <div class="chip-group" id="chip-rootcause">
+        <span class="chip ${inc.rootcause==='understand'?'selected':''}" data-val="understand" onclick="selectChip('chip-rootcause',this);showBranches()">Employee(s) didn't understand</span>
+        <span class="chip ${inc.rootcause==='careless'?'selected':''}" data-val="careless" onclick="selectChip('chip-rootcause',this);showBranches()">Employee(s) were careless</span>
+        <span class="chip ${inc.rootcause==='noprocess'?'selected':''}" data-val="noprocess" onclick="selectChip('chip-rootcause',this);showBranches()">No process / SOP exists</span>
+      </div>
+    </div>
+    <div class="branch-box ${inc.rootcause==='understand'?'visible':''}" id="branch-understand">
+      <div class="branch-label">Employee understanding — follow-up</div>
+      <div class="field">
+        <label>Was the employee trained &amp; qualified?</label>
+        <div class="chip-group" id="chip-trained">
+          <span class="chip ${inc.trained==='yes'?'selected':''}" data-val="yes" onclick="selectChip('chip-trained',this);showDisqBranch()">Yes, trained &amp; qualified</span>
+          <span class="chip ${inc.trained==='no'?'selected':''}" data-val="no" onclick="selectChip('chip-trained',this);showDisqBranch()">No, not yet trained</span>
+        </div>
+      </div>
+      <div class="branch-box ${inc.trained==='yes'?'visible':''}" id="branch-disqualify" style="background:#fff8f0;border-color:#ffb347">
+        <div class="branch-label" style="color:#7a3800">Disqualification assessment</div>
+        <div class="field">
+          <label>Meets criteria for disqualification per SOP?</label>
+          <div class="chip-group" id="chip-disqualify">
+            <span class="chip ${inc.disqualify==='yes'?'selected':''}" data-val="yes" onclick="selectChip('chip-disqualify',this)">Yes — disqualify per SOP</span>
+            <span class="chip ${inc.disqualify==='no'?'selected':''}" data-val="no" onclick="selectChip('chip-disqualify',this)">No — training gap only</span>
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label>SOP reference number</label>
+          <input type="text" id="inv-sop" value="${esc(inc.sop)}" placeholder="e.g. SOP1234">
+        </div>
+      </div>
+    </div>
+    <div class="branch-box ${inc.rootcause==='careless'?'visible':''}" id="branch-careless">
+      <div class="branch-label">Careless error — follow-up</div>
+      <div class="field" style="margin-bottom:0">
+        <label>First occurrence for this employee?</label>
+        <div class="chip-group" id="chip-firstocc">
+          <span class="chip ${inc.firstOccurrence==='yes'?'selected':''}" data-val="yes" onclick="selectChip('chip-firstocc',this)">Yes, first time</span>
+          <span class="chip ${inc.firstOccurrence==='no'?'selected':''}" data-val="no" onclick="selectChip('chip-firstocc',this)">No, repeated behavior</span>
+        </div>
+      </div>
+    </div>
+    <div class="branch-box ${inc.rootcause==='noprocess'?'visible':''}" id="branch-noprocess">
+      <div class="branch-label">No process — follow-up</div>
+      <div class="field" style="margin-bottom:0">
+        <label>Which shifts does the new process need to cover?</label>
+        <div class="chip-group" id="chip-shifts">
+          <span class="chip ${inc.shiftsAffected==='all'?'selected':''}" data-val="all" onclick="selectChip('chip-shifts',this)">All shifts</span>
+          <span class="chip ${inc.shiftsAffected==='affected'?'selected':''}" data-val="affected" onclick="selectChip('chip-shifts',this)">Affected shift only</span>
+        </div>
+      </div>
+    </div>
+    <div class="field" style="margin-top:1rem;margin-bottom:1.25rem">
+      <label>Investigation notes</label>
+      <textarea id="inv-notes" placeholder="Observations, evidence, contributing factors...">${esc(inc.notes)}</textarea>
+    </div>
+
+    <div class="section-divider">➕ Incident-specific Questions</div>
+    <div id="extra-questions-wrap">
+      ${(inc.extraQuestions||[]).map((q,i)=>`
+        <div class="extra-q" id="wrap-ex-${i}">
+          <div class="extra-q-row">
+            <input type="text" id="ex-${i}-q" value="${esc(q.q)}" placeholder="Question...">
+            <textarea id="ex-${i}-a" placeholder="Answer...">${esc(q.a)}</textarea>
+            <button class="extra-q-remove" onclick="document.getElementById('wrap-ex-${i}').remove()">✕</button>
+          </div>
+        </div>`).join('')}
+    </div>
+    <button class="btn add" onclick="addExtraQuestion()" style="margin-bottom:1.5rem">+ Add question</button>
+
+    <div class="section-divider">📊 Investigation Flowchart</div>
+    <div id="flowchart-wrap"></div>
+
+    <div style="display:flex;gap:.75rem;justify-content:flex-end;align-items:center;margin-top:1.5rem;flex-wrap:wrap">
+      <div class="saving-indicator" id="saving-indicator"><span class="saving-dot"></span>Saving...</div>
+      <button class="btn" onclick="document.getElementById('modal-overlay').classList.remove('open')">Close</button>
+      <button class="btn primary" id="save-inv-btn" onclick="saveInvestigation()">Save Investigation</button>
+    </div>`;
+
+  renderFlowchart();
 }
 
-function closeModal(e) {
-  if (e.target === document.getElementById('modal-overlay'))
-    document.getElementById('modal-overlay').classList.remove('open');
+function esc(str){return(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+// ══════════════════════════════════════════
+// CHIPS & BRANCHES
+// ══════════════════════════════════════════
+function selectChip(groupId,el){
+  document.querySelectorAll('#'+groupId+' .chip').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');renderFlowchart();
+}
+function getChipVal(groupId){const s=document.querySelector('#'+groupId+' .chip.selected');return s?s.dataset.val:''}
+function showBranches(){
+  ['branch-understand','branch-careless','branch-noprocess'].forEach(id=>document.getElementById(id)?.classList.remove('visible'));
+  const rc=getChipVal('chip-rootcause');
+  const map={understand:'branch-understand',careless:'branch-careless',noprocess:'branch-noprocess'};
+  if(rc&&map[rc])document.getElementById(map[rc])?.classList.add('visible');
+  renderFlowchart();
+}
+function showDisqBranch(){
+  document.getElementById('branch-disqualify')?.classList.toggle('visible',getChipVal('chip-trained')==='yes');
+  renderFlowchart();
+}
+async function setStatus(status){
+  const inc=getInc();if(!inc)return;
+  inc.status=status;
+  try {
+    await updateIncident(inc.spId,{Status:status});
+    renderModal();renderDashboard();
+  } catch(e){ showToast('Status update failed: '+e.message,true); }
 }
 
 // ══════════════════════════════════════════
-// VIEW / UI HELPERS
+// EXTRA QUESTIONS
 // ══════════════════════════════════════════
-function showView(v) {
-  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-  document.getElementById('view-' + v).classList.add('active');
-  document.getElementById('nav-' + v).classList.add('active');
-  if (v === 'form') resetForm();
+function addExtraQuestion(){
+  extraQCount++;const id='new-'+extraQCount;
+  const wrap=document.createElement('div');wrap.className='extra-q';wrap.id='wrap-'+id;
+  wrap.innerHTML=`<div class="extra-q-row">
+    <input type="text" id="${id}-q" placeholder="Question...">
+    <textarea id="${id}-a" placeholder="Answer..."></textarea>
+    <button class="extra-q-remove" onclick="document.getElementById('wrap-${id}').remove()">✕</button>
+  </div>`;
+  document.getElementById('extra-questions-wrap').appendChild(wrap);
+}
+function getExtraQuestions(){
+  return[...document.querySelectorAll('#extra-questions-wrap .extra-q')].map(wrap=>{
+    const qEl=wrap.querySelector('[id$="-q"]'),aEl=wrap.querySelector('[id$="-a"]');
+    return qEl&&qEl.value.trim()?{q:qEl.value.trim(),a:aEl?.value.trim()||''}:null;
+  }).filter(Boolean);
+}
+function getGeneralQuestions(){
+  return GENERAL_QUESTIONS.map((lbl,i)=>{
+    const val=document.getElementById('gq-'+i)?.value?.trim()||'';
+    return{q:lbl,a:val};
+  });
 }
 
-function resetForm() {
-  currentStep = 1; extraQCount = 0; selectedEmployees = [];
-  document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
-  document.getElementById('step1').classList.add('active');
-  document.querySelectorAll('.prog-step').forEach((p,i) => { p.classList.remove('active','done'); if(i===0) p.classList.add('active'); });
-  document.querySelectorAll('.form-card-body input:not(.people-picker-input), .form-card-body textarea').forEach(el => { el.value=''; });
-  document.querySelectorAll('.form-card-body select').forEach(el => { el.selectedIndex=0; });
-  document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
-  document.querySelectorAll('.branch-box').forEach(b => b.classList.remove('visible'));
-  document.getElementById('extra-questions').innerHTML = '';
-  renderEmployeeTags();
+// ══════════════════════════════════════════
+// SAVE INVESTIGATION
+// ══════════════════════════════════════════
+function getActions(rc,trained,disq){
+  if(rc==='careless')return['Coach / counsel employee'];
+  if(rc==='noprocess')return['Establish process and SOP','Train all affected shifts'];
+  if(rc==='understand'){
+    if(trained==='no')return['Coach / counsel supervisor','Train and qualify employee'];
+    if(trained==='yes'){
+      if(disq==='yes')return['Requalify employee','Track through training governance'];
+      if(disq==='no')return['Improve existing training'];
+    }
+    return['Determine training status'];
+  }
+  return[];
 }
 
-function showLoading(msg) {
-  document.getElementById('loading-screen').classList.add('visible');
-  document.getElementById('loading-msg').textContent = msg;
-  document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('main-app').style.display = 'none';
-}
-function hideLoading() { document.getElementById('loading-screen').classList.remove('visible'); }
+async function saveInvestigation(){
+  const inc=getInc();if(!inc)return;
+  const rc=getChipVal('chip-rootcause'),trained=getChipVal('chip-trained'),disq=getChipVal('chip-disqualify');
+  const actions=getActions(rc,trained,disq);
+  const newStatus = (inc.status==='open'&&rc)?'inprogress':inc.status;
 
-function showToast(msg, isError = false) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast' + (isError ? ' error' : '');
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3500);
+  const fields={
+    DelayDuration: document.getElementById('inv-delay')?.value?.trim()||'',
+    DetectedBy:    document.getElementById('inv-detected')?.value||'',
+    Recurrence:    getChipVal('chip-recurrence'),
+    Containment:   document.getElementById('inv-containment')?.value?.trim()||'',
+    RootCause:     rc, Trained:trained, Disqualify:disq,
+    SopReference:  document.getElementById('inv-sop')?.value?.trim()||'',
+    Notes:         document.getElementById('inv-notes')?.value?.trim()||'',
+    GeneralQuestions: JSON.stringify(getGeneralQuestions()),
+    ExtraQuestions:   JSON.stringify(getExtraQuestions()),
+    Actions:          JSON.stringify(actions),
+    Status:           newStatus
+  };
+
+  // Update local state
+  Object.assign(inc, {
+    delay:fields.DelayDuration, detected:fields.DetectedBy, recurrence:fields.Recurrence,
+    containment:fields.Containment, rootcause:rc, trained, disqualify:disq,
+    sop:fields.SopReference, notes:fields.Notes,
+    generalQuestions:getGeneralQuestions(), extraQuestions:getExtraQuestions(),
+    actions, status:newStatus
+  });
+
+  const btn=document.getElementById('save-inv-btn');
+  const saving=document.getElementById('saving-indicator');
+  btn.disabled=true;saving.classList.add('visible');
+
+  try {
+    await updateIncident(inc.spId, fields);
+    showToast(`${inc.id} saved.`, false, true);
+    renderDashboard();renderModal();
+  } catch(e){
+    showToast('Save failed: '+e.message,true);console.error(e);
+  } finally {
+    btn.disabled=false;saving.classList.remove('visible');
+  }
+}
+
+// ══════════════════════════════════════════
+// FLOWCHART
+// ══════════════════════════════════════════
+function renderFlowchart(){
+  const rc=getChipVal('chip-rootcause'),trained=getChipVal('chip-trained'),disq=getChipVal('chip-disqualify');
+  const wrap=document.getElementById('flowchart-wrap');if(!wrap)return;
+  if(!rc){wrap.innerHTML=`<div class="no-investigation">Select a root cause above to generate the flowchart.</div>`;return}
+  const actions=getActions(rc,trained,disq);
+  const NS='http://www.w3.org/2000/svg',W=580;
+  const H=rc==='noprocess'?400:rc==='understand'&&trained==='yes'?480:340;
+  const bF='#f7f8fa',bS='#c8cdd4',dF='#eef3ff',dS='#4d88ff';
+  const aF='#e8f5ec',aS='#3dca72',tM='#0f1923',tMu='#5a6472',arC='#9aa3ad';
+  function el(tag,attrs){const e=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))e.setAttribute(k,v);return e}
+  function box(svg,x,y,w,h,label,fill,stroke){
+    const g=document.createElementNS(NS,'g');
+    g.appendChild(el('rect',{x,y,width:w,height:h,rx:7,fill:fill||bF,stroke:stroke||bS,'stroke-width':'1.5'}));
+    const t=el('text',{x:x+w/2,y:y+h/2,'text-anchor':'middle','dominant-baseline':'central','font-size':'11','font-weight':'600',fill:tM,'font-family':'IBM Plex Sans,sans-serif'});
+    t.textContent=label;g.appendChild(t);svg.appendChild(g);
+  }
+  function dmnd(svg,x,y,w,h,lines){
+    const g=document.createElementNS(NS,'g'),cx=x+w/2,cy=y+h/2;
+    g.appendChild(el('polygon',{points:`${cx},${y} ${x+w},${cy} ${cx},${y+h} ${x},${cy}`,fill:dF,stroke:dS,'stroke-width':'1.5'}));
+    lines.forEach((line,i)=>{const t=el('text',{x:cx,y:cy+(i-(lines.length-1)/2)*13,'text-anchor':'middle','dominant-baseline':'central','font-size':'10','font-weight':'600',fill:tM,'font-family':'IBM Plex Sans,sans-serif'});t.textContent=line;g.appendChild(t)});
+    svg.appendChild(g);
+  }
+  function arr(svg,x1,y1,x2,y2){svg.appendChild(el('line',{x1,y1,x2,y2,stroke:arC,'stroke-width':'1.5','marker-end':'url(#fa3)'}))}
+  function pth(svg,d){svg.appendChild(el('path',{d,fill:'none',stroke:arC,'stroke-width':'1.5','marker-end':'url(#fa3)'}))}
+  function lbl(svg,x,y,txt){const t=el('text',{x,y,'font-size':'9','font-weight':'600',fill:tMu,'font-family':'IBM Plex Mono,monospace'});t.textContent=txt;svg.appendChild(t)}
+  const svg=el('svg',{width:'100%',viewBox:`0 0 ${W} ${H}`,xmlns:NS});
+  const defs=document.createElementNS(NS,'defs');
+  defs.innerHTML=`<marker id="fa3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="${arC}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>`;
+  svg.appendChild(defs);svg.appendChild(el('rect',{width:W,height:H,fill:'#fafcff'}));
+  box(svg,190,14,200,36,'Error causing delay','#e8f0ff','#4d88ff');
+  arr(svg,290,50,290,78);box(svg,190,78,200,36,'Investigate same/next shift');
+  arr(svg,290,114,290,146);dmnd(svg,218,146,144,48,['Root','cause?']);
+  if(rc==='careless'){arr(svg,362,170,410,170);box(svg,410,152,140,36,'Careless / attitude','#fff0f0','#e53935');arr(svg,480,188,480,240);box(svg,410,240,140,38,'Coach / counsel employee',aF,aS)}
+  if(rc==='noprocess'){arr(svg,290,194,290,240);box(svg,190,240,200,36,'No process exists','#fffbeb','#f5c842');arr(svg,290,276,290,316);box(svg,190,316,200,36,'Establish process + SOP',aF,aS);arr(svg,290,352,290,388);box(svg,190,388,200,36,'Train all shifts',aF,aS)}
+  if(rc==='understand'){
+    arr(svg,218,170,160,170);box(svg,36,152,124,36,"Didn't understand",'#eef0ff','#7b68ee');
+    arr(svg,98,188,98,230);dmnd(svg,44,230,108,42,['Trained?']);
+    if(trained==='no'){pth(svg,'M44,251 L16,251 L16,308 L32,308');lbl(svg,4,262,'No');box(svg,32,290,132,36,'Coach supervisor',aF,aS);arr(svg,164,308,192,308);box(svg,192,290,160,36,'Train employee',aF,aS)}
+    if(trained==='yes'){
+      arr(svg,98,272,98,316);lbl(svg,102,296,'Yes');dmnd(svg,44,316,108,44,['Disqualify','per SOP?']);
+      if(disq==='yes'){arr(svg,98,360,98,400);lbl(svg,102,382,'Yes');box(svg,24,400,148,36,'Requalify + track governance',aF,aS)}
+      else if(disq==='no'){pth(svg,'M44,338 L16,338 L16,402 L32,402');lbl(svg,4,352,'No');box(svg,32,384,132,36,'Improve training',aF,aS)}
+    }
+  }
+  wrap.innerHTML='';
+  const fd=document.createElement('div');fd.className='flow-container';fd.appendChild(svg);wrap.appendChild(fd);
+  if(actions.length){const pd=document.createElement('div');pd.className='action-pills';pd.innerHTML=actions.map(a=>`<span class="action-pill">→ ${a}</span>`).join('');wrap.appendChild(pd)}
+}
+
+// ══════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════
+function showToast(msg,isError=false,isSuccess=false){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='toast'+(isError?' error':isSuccess?' success':'');
+  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);
 }
 
 // ══════════════════════════════════════════
